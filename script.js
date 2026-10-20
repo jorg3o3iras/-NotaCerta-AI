@@ -2395,7 +2395,10 @@ async function carregarProvasParaFiltro() {
         const provas = await carregarProvasComCache();
         ['filtro-prova', 'rel-turma-prova'].forEach(id => {
             const s = document.getElementById(id);
-            if (s) s.innerHTML = '<option value="">Todas as provas</option>' + provas.map(p => `<option value="${p.id}" data-disciplina="${escapeAttr(p.disciplina || '')}">${escapeHtml(p.titulo)}</option>`).join('');
+            if (s) {
+                const label = id === 'rel-turma-prova' ? 'Selecione a prova' : 'Todas as provas';
+                s.innerHTML = `<option value="">${label}</option>` + provas.map(p => `<option value="${p.id}" data-disciplina="${escapeAttr(p.disciplina || '')}">${escapeHtml(p.titulo)}</option>`).join('');
+            }
         });
     } catch (e) { console.error(e); }
 }
@@ -2698,40 +2701,124 @@ async function carregarRelatorioTurmaFiltrado() {
         const ei = document.getElementById('rel-turma-escola').value;
         const se = document.getElementById('rel-turma-serie').value;
         const ti = document.getElementById('rel-turma-turma').value;
-        const pi = document.getElementById('rel-turma-prova').value;
         const sp = document.getElementById('rel-turma-prova');
+        const pi = sp.value;
         const op = sp.options[sp.selectedIndex];
-        let discSel = 'Português';
-        if (op && op.dataset.disciplina) discSel = op.dataset.disciplina;
-        const dm = { 'Português': { k: 'portugues', label: 'Português' }, 'Matemática': { k: 'matematica', label: 'Matemática' }, 'Produção de Texto': { k: 'producao', label: 'Produção', prod: true }, 'Ciências Humanas': { k: 'ch', label: 'CH' }, 'Ciências Naturais': { k: 'cn', label: 'CN' }, 'História': { k: 'ch', label: 'CH' }, 'Geografia': { k: 'ch', label: 'CH' }, 'Inglês': { k: 'portugues', label: 'Português' } };
-        const info = dm[discSel] || dm['Português'];
+
+        // ─── 1) Mapeamento de disciplinas ───
+        const dm = {
+            'Português':         { k: 'portugues',  label: 'Português' },
+            'Matemática':        { k: 'matematica', label: 'Matemática' },
+            'Produção de Texto': { k: 'producao',   label: 'Produção', prod: true },
+            'Ciências Humanas':  { k: 'ch',         label: 'CH' },
+            'Ciências Naturais': { k: 'cn',         label: 'CN' },
+            'História':          { k: 'ch',         label: 'CH' },
+            'Geografia':         { k: 'ch',         label: 'CH' },
+            'Inglês':            { k: 'portugues',  label: 'Português' }
+        };
+
+        // ─── 2) Determinar disciplina (SEM default fixo de Português) ───
+        let discSel = '';
+        if (op && op.value && op.dataset.disciplina) {
+            // Tem prova selecionada → usa a disciplina dela
+            discSel = op.dataset.disciplina;
+        } else {
+            // Sem prova selecionada → usa a PRIMEIRA prova da lista
+            for (let i = 1; i < sp.options.length; i++) {
+                const opt = sp.options[i];
+                if (opt.value && opt.dataset.disciplina) {
+                    discSel = opt.dataset.disciplina;
+                    sp.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // ─── 3) Se NÃO há nenhuma prova → mostra mensagem e para ───
+        if (!discSel) {
+            const tb = document.getElementById('tb-rel-alunos');
+            if (tb) tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
+            setText('rel-total-alunos-tabela', '0 alunos');
+            setText('rel-total-correcoes', '0 correções');
+            setText('rel-disc-acertos', '0');
+            setText('rel-disc-erros', '0');
+            setText('rel-disc-media', '0.0');
+            setText('rel-disciplina-nome', '—');
+            setText('rel-disc-conceito', '—');
+            const c = document.getElementById('rel-acertos-por-questao');
+            if (c) c.style.display = 'none';
+            return;
+        }
+
+        const info = dm[discSel] || { k: 'portugues', label: 'Português' };
         const discKey = info.k;
         const isProd = !!info.prod;
+
+        // ─── 4) Carregar alunos da turma (se turma selecionada) ───
         let alunosTurma = [];
         if (ti) {
-            try { const d = await carregarAlunosComCache({ turma_id: ti }); if (d && !d.erro && Array.isArray(d)) alunosTurma = d; } catch (e) {}
+            try {
+                const d = await carregarAlunosComCache({ turma_id: ti });
+                if (d && !d.erro && Array.isArray(d)) alunosTurma = d;
+            } catch (e) { /* ignore */ }
         }
+
+        // ─── 5) Buscar dados agrupados do backend ───
         let url = API_URL + '/api/historico/agrupado';
         const p = new URLSearchParams();
-        if (ei) p.append('escola', ei); if (se) p.append('serie', se); if (ti) p.append('turma', ti); if (pi) p.append('prova', pi);
+        if (ei) p.append('escola', ei);
+        if (se) p.append('serie', se);
+        if (ti) p.append('turma', ti);
+        if (pi) p.append('prova', pi);
         if (p.toString()) url += '?' + p.toString();
         const r = await apiFetch(url);
         const agrup = await r.json();
-        const com = [], sem = [];
+
+        // ─── 6) Separar "com avaliação" vs "sem avaliação" ───
+        const com = [];
+        const sem = [];
         if (agrup && !agrup.erro && Array.isArray(agrup)) {
             agrup.forEach(a => {
                 const dd = a[discKey];
-                if (dd && typeof dd === 'object') {
-                    const ac = dd.acertos || 0, tot = dd.total || 20, er = tot - ac;
+                // Filtra: só entra quem realmente tem avaliação registrada
+                if (dd && typeof dd === 'object' && !dd.sem_avaliacao && (dd.data || dd.prova) && (dd.total > 0 || dd.nota > 0)) {
+                    const ac = dd.acertos || 0;
+                    const tot = (typeof dd.total === 'number' && dd.total > 0) ? dd.total : (dd.nota > 0 ? 10 : 0);
+                    const er = Math.max(0, tot - ac);
                     const pct = tot > 0 ? Math.round((ac / tot) * 100) : 0;
                     com.push({ ...a, dados: { ac, er, tot, pct, nota: dd.nota || 0 } });
                 }
             });
         }
+
+        // ─── 7) Adicionar alunos SEM avaliação (aparecem como "—") ───
         if (alunosTurma.length > 0) {
             const ids = new Set(com.map(a => a.aluno_id));
-            alunosTurma.forEach(a => { if (!ids.has(a.id)) sem.push({ aluno_id: a.id, aluno_nome: a.nome, serie: a.turma_serie || se, dados: { ac: 0, er: 0, tot: 20, pct: 0, nota: 0 } }); });
+
+            // Pega o total de questões REAL da prova selecionada
+            let totalProva = 0;
+            const provaIdRef = pi || (op && op.value);
+            if (provaIdRef) {
+                const opt = Array.from(sp.options).find(o => o.value == provaIdRef);
+                if (opt && opt.dataset.quantidade) {
+                    totalProva = parseInt(opt.dataset.quantidade) || 0;
+                }
+            }
+
+            alunosTurma.forEach(a => {
+                if (!ids.has(a.id)) {
+                    sem.push({
+                        aluno_id: a.id,
+                        aluno_nome: a.nome,
+                        serie: a.turma_serie || se,
+                        numero_chamada: a.numero_chamada,
+                        dados: { ac: 0, er: 0, tot: totalProva, pct: 0, nota: 0, sem_avaliacao: true }
+                    });
+                }
+            });
         }
+
+        // ─── 8) Preencher cards de resumo ───
         const totalC = com.length;
         setText('rel-total-alunos-tabela', totalC + ' alunos');
         setText('rel-total-correcoes', totalC + ' correções');
@@ -2743,28 +2830,63 @@ async function carregarRelatorioTurmaFiltrado() {
         const mediaPct = totalC > 0 ? Math.round(com.reduce((s, a) => s + a.dados.pct, 0) / totalC) : 0;
         setText('rel-disciplina-nome', info.label);
         setText('rel-disc-conceito', calcularConceito(mediaPct));
+
+        // ─── 9) Redesenhar o cabeçalho da tabela ───
         const table = document.querySelector('#tb-rel-alunos')?.closest('table');
         const thead = table?.querySelector('thead');
         const cols = isProd ? 1 : 3;
         if (thead) {
             thead.innerHTML = `<tr><th>POS.</th><th>Nº</th><th>NOME</th><th>SÉRIE</th><th colspan="${cols}">${info.label.toUpperCase()}</th></tr><tr>${Array(4).fill('<th></th>').join('')}${isProd ? '<th>NOTA</th>' : '<th>ACERTOS</th><th>ERROS</th><th>NOTA</th>'}</tr>`;
         }
+
+        // ─── 10) Redesenhar o corpo da tabela ───
         const tb = document.getElementById('tb-rel-alunos');
         if (!tb) return;
         const all = [...com, ...sem];
-        if (all.length === 0) { tb.innerHTML = `<tr><td colspan="${4+cols}" style="text-align:center;padding:30px;color:var(--text3);">Nenhum aluno</td></tr>`; return; }
+        if (all.length === 0) {
+            tb.innerHTML = `<tr><td colspan="${4 + cols}" style="text-align:center;padding:30px;color:var(--text3);">Nenhum aluno encontrado com os filtros selecionados</td></tr>`;
+            return;
+        }
+
         all.sort((a, b) => b.dados.pct - a.dados.pct);
         tb.innerHTML = all.map((a, ix) => {
             const d = a.dados;
             const med = ix === 0 ? '🥇' : ix === 1 ? '🥈' : ix === 2 ? '🥉' : (ix + 1);
-            const cel = isProd
-                ? `<td style="text-align:center;font-weight:900;color:var(--purple);">${d.nota ? Number(d.nota).toFixed(1) : '—'}</td>`
-                : `<td style="text-align:center;color:var(--green);font-weight:700;">${d.ac}</td><td style="text-align:center;color:var(--red);font-weight:700;">${d.er}</td><td style="text-align:center;color:var(--blue);font-weight:900;">${d.nota ? Number(d.nota).toFixed(1) : '—'}</td>`;
-            return `<tr><td style="text-align:center;">${med}</td><td style="text-align:center;">${ix+1}</td><td style="padding-left:10px;"><strong>${escapeHtml(a.aluno_nome || '—')}</strong></td><td style="text-align:center;"><span class="badge badge-purple" style="font-size:9px;">${escapeHtml(a.serie || '—')}</span></td>${cel}</tr>`;
+            const numeroReal = a.numero_chamada || (ix + 1);
+            const temAvaliacao = !d.sem_avaliacao && (d.tot > 0 || d.nota > 0);
+
+            let cel;
+            if (isProd) {
+                cel = `<td style="text-align:center;font-weight:900;color:var(--purple);">${temAvaliacao && d.nota ? Number(d.nota).toFixed(1) : '—'}</td>`;
+            } else if (temAvaliacao) {
+                cel = `<td style="text-align:center;color:var(--green);font-weight:700;">${d.ac}</td><td style="text-align:center;color:var(--red);font-weight:700;">${d.er}</td><td style="text-align:center;color:var(--blue);font-weight:900;">${d.nota ? Number(d.nota).toFixed(1) : '—'}</td>`;
+            } else {
+                cel = `<td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td>`;
+            }
+
+            return `<tr>
+                <td style="text-align:center;">${med}</td>
+                <td style="text-align:center;">${numeroReal}</td>
+                <td style="padding-left:10px;"><strong>${escapeHtml(a.aluno_nome || '—')}</strong></td>
+                <td style="text-align:center;"><span class="badge badge-purple" style="font-size:9px;">${escapeHtml(a.serie || '—')}</span></td>
+                ${cel}
+            </tr>`;
         }).join('');
-        if (isProd) { const c = document.getElementById('rel-acertos-por-questao'); if (c) c.style.display = 'none'; }
-        else { const c = document.getElementById('rel-acertos-por-questao'); if (c) c.style.display = 'block'; atualizarGraficoAcertosPorQuestao(agrup, info.label, discKey); }
-    } catch (e) { console.error(e); showToast('❌ ' + e.message, 'error'); }
+
+        // ─── 11) Gráfico de acertos por questão ───
+        if (isProd) {
+            const c = document.getElementById('rel-acertos-por-questao');
+            if (c) c.style.display = 'none';
+        } else {
+            const c = document.getElementById('rel-acertos-por-questao');
+            if (c) c.style.display = 'block';
+            atualizarGraficoAcertosPorQuestao(agrup, info.label, discKey);
+        }
+
+    } catch (e) {
+        console.error('❌ Erro em carregarRelatorioTurmaFiltrado:', e);
+        showToast('❌ Erro ao carregar relatório: ' + e.message, 'error');
+    }
 }
 function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
     try {
