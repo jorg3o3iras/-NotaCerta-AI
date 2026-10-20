@@ -2607,7 +2607,7 @@ async function carregarFiltrosRelTurma() {
         const se = document.getElementById('rel-turma-escola');
         if (se && escolas && !escolas.erro) {
             const c = se.value;
-            se.innerHTML = '<option value="">Todas as escolas</option>';
+            se.innerHTML = '<option value="">Selecione a escola</option>';
             escolas.forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = e.nome; se.appendChild(o); });
             if (c) { se.value = c; if (c) carregarTurmasRelTurma(c); }
         }
@@ -2615,7 +2615,7 @@ async function carregarFiltrosRelTurma() {
         const sp = document.getElementById('rel-turma-prova');
         if (sp && provas && !provas.erro) {
             const c = sp.value;
-            sp.innerHTML = '<option value="">Todas as provas</option>';
+            sp.innerHTML = '<option value="">Selecione a prova</option>';
             provas.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.titulo + ' - ' + (p.serie || '') + ' - ' + (p.disciplina || ''); o.dataset.disciplina = p.disciplina || ''; sp.appendChild(o); });
             if (c) sp.value = c;
         }
@@ -2625,7 +2625,7 @@ async function carregarTurmasRelTurma(escolaId) {
     const st = document.getElementById('rel-turma-turma');
     const ss = document.getElementById('rel-turma-serie');
     if (!st) return;
-    st.innerHTML = '<option value="">Todas as turmas</option>';
+    st.innerHTML = '<option value="">Selecione a turma</option>';
     try {
         const turmas = escolaId ? await carregarTurmasComCache(escolaId) : await carregarTurmasComCache();
         if (turmas && !turmas.erro) turmas.forEach(t => { const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' - ' + (t.serie || ''); o.dataset.serie = t.serie || ''; st.appendChild(o); });
@@ -2638,13 +2638,13 @@ function limparFiltrosRelTurma() {
     document.getElementById('rel-turma-serie').value = '';
     document.getElementById('rel-turma-prova').value = '';
     const st = document.getElementById('rel-turma-turma');
-    st.innerHTML = '<option value="">Todas as turmas</option>';
+    st.innerHTML = '<option value="">Selecione a turma</option>';
     carregarTurmasComCache().then(turmas => {
         if (turmas && !turmas.erro) { turmas.forEach(t => { const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' - ' + (t.serie || ''); o.dataset.serie = t.serie || ''; st.appendChild(o); }); carregarRelatorioTurmaFiltrado(); }
     }).catch(e => console.error(e));
     const sp = document.getElementById('rel-turma-prova');
     carregarProvasComCache(true).then(provas => {
-        if (provas && !provas.erro) { sp.innerHTML = '<option value="">Todas as provas</option>'; provas.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.titulo + ' - ' + (p.serie || '') + ' - ' + (p.disciplina || ''); o.dataset.disciplina = p.disciplina || ''; sp.appendChild(o); }); }
+        if (provas && !provas.erro) { sp.innerHTML = '<option value="">Selecione a prova</option>'; provas.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.titulo + ' - ' + (p.serie || '') + ' - ' + (p.disciplina || ''); o.dataset.disciplina = p.disciplina || ''; sp.appendChild(o); }); }
     }).catch(e => console.error(e));
 }
 async function carregarRelatorioTurmaFiltrado() {
