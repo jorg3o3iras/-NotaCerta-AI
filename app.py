@@ -264,8 +264,8 @@ try:
     from pyzbar.pyzbar import decode as _pyzbar_decode
     PYZBAR_AVAILABLE = True
     print("✅ pyzbar disponível")
-except ImportError:
-    print("⚠️ pyzbar indisponível (DLL do zbar não instalada) — QR desativado")
+except Exception:
+     print("⚠️ pyzbar indisponível (DLL ausente) — QR por foto desativado, usando OpenCV")
 
 # ============================================
 # DB POOL
