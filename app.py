@@ -2362,6 +2362,7 @@ def historico_agrupado():
             av = d['avaliacoes']
             default = {'nota': 0, 'acertos': 0, 'erros': 0, 'total': 20,
                        'questoes_status': [], 'bncc': [], 'respostas': [], 'gabarito': []}
+                       'sem_avaliacao': True}
             port = dict(av.get('Portugues', default))
             mat = dict(av.get('Matematica', default))
             prod = dict(av.get('Producao', default))
