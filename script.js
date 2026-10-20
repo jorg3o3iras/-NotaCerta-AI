@@ -1348,10 +1348,16 @@ async function buscarAluno(alunoId) {
     catch (e) { throw new Error('Erro ao buscar aluno'); }
 }
 async function enviarParaCorrecao(imagemBase64, provaId, alunoId) {
-    const response = await apiFetch(`${API_URL}/api/corrigir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imagem: imagemBase64, prova_id: parseInt(provaId), aluno_id: parseInt(alunoId) }) });
-    if (!response.ok) { const t = await response.text(); throw new Error(`Erro ${response.status}: ${t.substring(0, 100)}`); }
-    const dados = await response.json();
-    if (dados.erro) throw new Error(dados.erro);
+    const response = await apiFetch(`${API_URL}/api/corrigir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imagem: imagemBase64, prova_id: parseInt(provaId), aluno_id: parseInt(alunoId) })
+    });
+    let dados = null;
+    try { dados = await response.json(); } catch (e) { dados = null; }
+    if (dados && dados.erro) throw new Error(dados.erro);
+    if (!response.ok) throw new Error(`Erro ${response.status} ao corrigir`);
+    if (!dados) throw new Error(`Resposta inválida do servidor (${response.status})`);
     if (!dados.respostas_detectadas && !dados.questoes_status) throw new Error('A IA não detectou respostas. Tire uma foto mais nítida.');
     return dados;
 }
@@ -2103,7 +2109,9 @@ async function corrigirAutomatico() {
     if (cd) cd.innerHTML = '<div style="text-align:center;padding:20px;"><div class="spinner" style="margin:0 auto 14px;"></div><p style="font-weight:700;">🔍 Lendo QR Code...</p></div>';
     try {
         const r = await apiFetch(`${API_URL}/api/corrigir-automatico`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imagem: img, salvar_auto: false }) });
-        const dados = await r.json();
+        let dados = null;
+        try { dados = await r.json(); } catch (e) { dados = null; }
+        if (!dados) { mostrarErroAutomatico(`Resposta inválida (${r.status})`); return; }
         if (!r.ok || !dados.sucesso) { mostrarErroAutomatico(dados.erro || 'Erro', dados.dicas); return; }
         mostrarResultadoAutomatico(dados);
         window._autoImagem = null;
