@@ -357,19 +357,27 @@ def calcular_conceito(porcentagem):
         return {'nome': 'avancado', 'rotulo': '🟢 Avançado', 'faixa': 'acima de 80%', 'cor': '#10b981', 'badge': 'badge-conceito-avancado'}
 
 
+def _sem_acento(s):
+    """Remove acentos e baixa caixa — 'Ciências' -> 'ciencias'."""
+    import unicodedata
+    s = (s or '').strip().lower()
+    return ''.join(c for c in unicodedata.normalize('NFD', s)
+                   if unicodedata.category(c) != 'Mn')
+
+
 def identificar_disciplina(prova_titulo, disciplina, serie):
-    d = (disciplina or '').lower().strip()
-    if re.search(r'\bportugu[êe]s\b', d) or 'língua' in d: return 'Portugues'
-    if re.search(r'\bmatem[áa]tica\b', d): return 'Matematica'
-    if re.search(r'\bprodu[cç][ãa]o\b', d) or 'texto' in d or 'redação' in d or 'redacao' in d: return 'Producao'
+    d = _sem_acento(disciplina)
+    if re.search(r'\bportugues\b', d) or 'lingua' in d: return 'Portugues'
+    if re.search(r'\bmatematica\b', d): return 'Matematica'
+    if re.search(r'\bproducao\b', d) or 'texto' in d or 'redacao' in d: return 'Producao'
     if re.search(r'\bch\b', d) or 'ciencias humanas' in d: return 'CH'
-    if re.search(r'\bcn\b', d) or 'ciencias naturais' in d: return 'CN'
-    t = (prova_titulo or '').lower()
-    if re.search(r'\bportugu[êe]s\b', t) or 'língua' in t: return 'Portugues'
-    if re.search(r'\bmatem[áa]tica\b', t) or re.search(r'\bmat\b', t): return 'Matematica'
-    if re.search(r'\bprodu[cç][ãa]o\b', t) or 'texto' in t or 'redação' in t: return 'Producao'
+    if re.search(r'\bcn\b', d) or 'ciencias naturais' in d or 'ciencias da natureza' in d: return 'CN'
+    t = _sem_acento(prova_titulo)
+    if re.search(r'\bportugues\b', t) or 'lingua' in t: return 'Portugues'
+    if re.search(r'\bmatematica\b', t) or re.search(r'\bmat\b', t): return 'Matematica'
+    if re.search(r'\bproducao\b', t) or 'texto' in t or 'redacao' in t: return 'Producao'
     if re.search(r'\bch\b', t) or 'ciencias humanas' in t: return 'CH'
-    if re.search(r'\bcn\b', t) or 'ciencias naturais' in t: return 'CN'
+    if re.search(r'\bcn\b', t) or 'ciencias naturais' in t or 'ciencias da natureza' in t: return 'CN'
     if serie:
         m = re.search(r'(\d+)', serie)
         if m:
