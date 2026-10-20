@@ -787,22 +787,55 @@ def preprocessar_imagem_para_ia(imagem_base64):
 
 def gerar_prompt_otimizado(padrao_gabarito, aluno_nome, serie, disciplina, aviso_extra=None):
     total = padrao_gabarito['total_questoes']
-    alts = padrao_gabarito['alternativas']
-    alts_str = ', '.join(alts); na = len(alts)
-    aviso = f"\n⚠️ ERRO NA TENTATIVA ANTERIOR: {aviso_extra}\nOlhe a imagem com MUITO mais atenção.\n" if aviso_extra else ""
-    return f"""Você é um sistema OMR profissional. Analise a foto de um cartão-resposta e identifique QUAL bolha está preenchida em CADA uma das {total} questões.
+    alternativas = padrao_gabarito['alternativas']
+    alternativas_str = ', '.join(alternativas)
+    num_alts = len(alternativas)
 
-O cartão tem 4 marcadores pretos nos cantos. Entre eles há uma grade com EXATAMENTE {total} linhas numeradas (01 a {total:02d}). Cada linha tem {na} bolhas: {alts_str}. A bolha MARCADA tem o INTERIOR ESCURO. A bolha NÃO MARCADA tem o INTERIOR BRANCO.
+    aviso_bloco = ""
+    if aviso_extra:
+        aviso_bloco = f"""
+⚠️ ERRO NA TENTATIVA ANTERIOR: {aviso_extra}
+Você precisa OLHAR A IMAGEM COM MAIS ATENÇÃO.
+Se você não consegue distinguir as bolhas, retorne null (não chute!).
+"""
 
-REGRA CRÍTICA: se você NÃO TEM CERTEZA ABSOLUTA, retorne null. NUNCA chute.
+    return f"""Você é um sistema OMR (Optical Mark Recognition) profissional.
 
-Formato JSON:
-{{"respostas": ["B", null, "C", ...], "confianca_por_questao": [95, 0, 90, ...]}}
+═══════════════════════════════════════════════════════
+TAREFA
+═══════════════════════════════════════════════════════
+Analise a foto de um cartão-resposta e identifique QUAL bolha está
+preenchida em CADA uma das {total} questões.
 
-- "respostas" tem EXATAMENTE {total} itens (letra ou null)
-- "confianca_por_questao" tem {total} números de 0 a 100
-- null → confiança 0
-{aviso}
+O cartão tem 4 marcadores pretos nos cantos. Entre eles há uma grade
+com EXATAMENTE {total} linhas numeradas (01 a {total:02d}).
+Cada linha tem {num_alts} bolhas: {alternativas_str}.
+A bolha MARCADA tem o INTERIOR ESCURO (caneta/lápis).
+A bolha NÃO MARCADA tem o INTERIOR BRANCO.
+
+═══════════════════════════════════════════════════════
+REGRA CRÍTICA
+═══════════════════════════════════════════════════════
+🚨 Se você NÃO TEM CERTEZA ABSOLUTA de qual bolha está marcada,
+   retorne null para aquela questão.
+🚨 NUNCA chute. NUNCA invente.
+🚨 É MELHOR retornar null do que errar.
+
+═══════════════════════════════════════════════════════
+FORMATO DE SAÍDA (JSON puro)
+═══════════════════════════════════════════════════════
+{{
+  "respostas": ["B", null, "C", "A", null, ...],
+  "confianca_por_questao": [95, 0, 90, 88, 0, ...]
+}}
+
+REGRAS DO JSON:
+- "respostas" DEVE ter EXATAMENTE {total} itens
+- Cada item é uma letra ({alternativas_str}) OU null
+- "confianca_por_questao" DEVE ter {total} números de 0 a 100
+- Se você respondeu null, a confiança DEVE ser 0
+
+{aviso_bloco}
 Retorne SOMENTE o JSON.""".strip()
 
 
@@ -887,9 +920,18 @@ def _executar_chamada_openai(data_url, padrao_gabarito, aluno_nome, serie, disci
     alts = padrao_gabarito['alternativas']
     prompt = gerar_prompt_otimizado(padrao_gabarito, aluno_nome, serie, disciplina, aviso_extra)
     messages = [
-        {"role": "system", "content": "Você é um sistema OMR profissional. Se não tiver CERTEZA ABSOLUTA, retorne null. NUNCA chute. Responda APENAS JSON."},
-        {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": data_url, "detail": "high"}}]}
-    ]
+    {
+        "role": "system",
+        "content": (
+            "Você é um sistema OMR profissional. Analise cartões-resposta "
+            "com precisão EXTREMA. Se não tiver CERTEZA ABSOLUTA de uma "
+            "resposta, retorne null. NUNCA chute. Responda APENAS com JSON "
+            "válido no formato {\"respostas\": [...], \"confianca_por_questao\": [...]}. "
+            "Sem markdown, sem texto extra."
+        )
+    },
+    {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": data_url, "detail": "high"}}]}
+]
     for tentativa in range(1, 4):
         try:
             logging.info(f"🤖 OpenAI tentativa {tentativa}/3")
@@ -3075,39 +3117,70 @@ def backup_database():
 # ============================================
 
 def extrair_dados_qrcode(imagem_base64):
-    if not PYZBAR_AVAILABLE: return None
     try:
-        from pyzbar.pyzbar import decode
         if ',' in imagem_base64 and imagem_base64.strip().startswith('data:'):
-            imagem_base64 = imagem_base64.split(',',1)[1]
-        imagem_base64 = imagem_base64.strip().replace('\n','').replace('\r','').replace(' ','')
+            imagem_base64 = imagem_base64.split(',', 1)[1]
+        imagem_base64 = imagem_base64.strip().replace('\n', '').replace('\r', '').replace(' ', '')
         image_data = base64.b64decode(imagem_base64, validate=False)
         np_arr = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if img is None: return None
-        codigos = decode(img)
-        if not codigos:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
-            codigos = decode(clahe.apply(gray))
-        if not codigos: return None
-        for codigo in codigos:
-            dados = codigo.data.decode('utf-8')
-            if not dados.startswith('ALUNO:'): continue
-            r = {}
-            for parte in dados.split('|'):
-                if ':' in parte:
-                    k, v = parte.split(':', 1)
-                    k = k.strip().upper(); v = v.strip()
-                    if v.isdigit():
-                        if k == 'ALUNO': r['aluno_id'] = int(v)
-                        elif k == 'PROVA': r['prova_id'] = int(v)
-                        elif k == 'ESCOLA': r['escola_id'] = int(v)
-                        elif k == 'TURMA': r['turma_id'] = int(v)
-            if 'aluno_id' in r and 'prova_id' in r: return r
+        if img is None:
+            return None
+
+        dados_str = None
+
+        if PYZBAR_AVAILABLE:
+            try:
+                from pyzbar.pyzbar import decode as _decode
+                codigos = _decode(img)
+                if not codigos:
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+                    codigos = _decode(clahe.apply(gray))
+                for c in codigos:
+                    d = c.data.decode('utf-8', errors='replace')
+                    if d.startswith('ALUNO:'):
+                        dados_str = d
+                        break
+            except Exception:
+                pass
+
+        if not dados_str:
+            try:
+                detector = cv2.QRCodeDetector()
+                for tent in (img, cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)):
+                    try:
+                        d, _, _ = detector.detectAndDecode(tent)
+                        if d and d.startswith('ALUNO:'):
+                            dados_str = d
+                            break
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        if not dados_str:
+            logging.warning("⚠️ QR: nenhum código encontrado")
+            return None
+
+        r = {}
+        for parte in dados_str.split('|'):
+            if ':' in parte:
+                k, v = parte.split(':', 1)
+                k = k.strip().upper()
+                v = v.strip()
+                if v.isdigit():
+                    if k == 'ALUNO':    r['aluno_id'] = int(v)
+                    elif k == 'PROVA':  r['prova_id'] = int(v)
+                    elif k == 'ESCOLA': r['escola_id'] = int(v)
+                    elif k == 'TURMA':  r['turma_id'] = int(v)
+        if 'aluno_id' in r and 'prova_id' in r:
+            logging.info(f"✅ QR lido: {r}")
+            return r
         return None
     except Exception as e:
-        logging.error(f"❌ QR: {e}"); return None
+        logging.error(f"❌ Erro ao ler QR: {e}")
+        return None
 
 
 @app.route('/api/corrigir-automatico', methods=['POST'])
