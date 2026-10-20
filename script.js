@@ -3069,6 +3069,158 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof carregarProvasParaTexto === 'function') carregarProvasParaTexto();
     if (typeof carregarProvasParaFiltro === 'function') carregarProvasParaFiltro();
     if (typeof carregarProvasParaDesempenho === 'function') carregarProvasParaDesempenho();
+
 });
 
-console.log('✅ script.js carregado (Parte 2/2 — completo)');
+
+
+// ============================================
+// DISCIPLINAS — CRUD
+// ============================================
+
+async function carregarDisciplinas() {
+  const tb = document.getElementById('tb-disciplinas');
+  if (!tb) return;
+  tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text3);">Carregando disciplinas...</td></tr>';
+  try {
+    const r = await apiFetch(API_URL + '/api/disciplinas');
+    const lista = await r.json();
+    renderizarDisciplinas(Array.isArray(lista) ? lista : []);
+  } catch (e) {
+    console.error('carregarDisciplinas:', e);
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--red);">Erro: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderizarDisciplinas(lista) {
+  const tb = document.getElementById('tb-disciplinas');
+  if (!tb) return;
+  if (!lista.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text3);">Nenhuma disciplina cadastrada. Clique em "+ Nova Disciplina".</td></tr>';
+    return;
+  }
+  tb.innerHTML = lista.map(d => {
+    const escopo = d.escola_id === null
+      ? '<span class="badge badge-blue">🌐 Global</span>'
+      : '<span class="badge badge-green">🏫 Escola</span>';
+    const acoes = d.escola_id !== null
+      ? `<button class="btn btn-outline btn-sm" onclick='abrirModalDisciplina(${JSON.stringify(d)})' title="Editar">✏️</button>
+         <button class="btn btn-red btn-sm" onclick="excluirDisciplina(${d.id}, '${String(d.nome).replace(/'/g, "\\'")}')" title="Excluir">🗑️</button>`
+      : '<span style="font-size:11px;color:var(--text3);">—</span>';
+    return `<tr>
+      <td style="text-align:center; font-size:22px;">${escapeHtml(d.icone || '📚')}</td>
+      <td><strong>${escapeHtml(d.nome)}</strong></td>
+      <td><code>${escapeHtml(d.codigo)}</code></td>
+      <td><span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:${escapeAttr(d.cor || '#3b82f6')};border:1px solid var(--border);"></span></td>
+      <td>${escopo}</td>
+      <td style="text-align:center;">${d.ordem ?? 99}</td>
+      <td>${acoes}</td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirModalDisciplina(d) {
+  if (typeof openM === 'function') openM('m-disciplina');
+  else document.getElementById('m-disciplina').style.display = 'flex';
+
+  const titulo = document.getElementById('m-disciplina-titulo');
+  const inputId = document.getElementById('disciplina-id');
+  const inputNome = document.getElementById('disciplina-nome');
+  const inputIcone = document.getElementById('disciplina-icone');
+  const inputCor = document.getElementById('disciplina-cor');
+  const inputOrdem = document.getElementById('disciplina-ordem');
+
+  if (d && d.id) {
+    if (titulo) titulo.textContent = '✏️ Editar Disciplina';
+    if (inputId) inputId.value = d.id;
+    if (inputNome) inputNome.value = d.nome || '';
+    if (inputIcone) inputIcone.value = d.icone || '📚';
+    if (inputCor) inputCor.value = d.cor || '#3b82f6';
+    if (inputOrdem) inputOrdem.value = d.ordem ?? 99;
+  } else {
+    if (titulo) titulo.textContent = '📚 Nova Disciplina';
+    if (inputId) inputId.value = '';
+    if (inputNome) inputNome.value = '';
+    if (inputIcone) inputIcone.value = '📚';
+    if (inputCor) inputCor.value = '#3b82f6';
+    if (inputOrdem) inputOrdem.value = 99;
+  }
+  setTimeout(() => { if (inputNome) inputNome.focus(); }, 60);
+}
+
+function fecharModalDisciplina() {
+  if (typeof closeM === 'function') closeM('m-disciplina');
+  else document.getElementById('m-disciplina').style.display = 'none';
+}
+
+async function salvarDisciplina() {
+  const id = (document.getElementById('disciplina-id')?.value || '').trim();
+  const nome = (document.getElementById('disciplina-nome')?.value || '').trim();
+  const icone = (document.getElementById('disciplina-icone')?.value || '').trim() || '📚';
+  const cor = document.getElementById('disciplina-cor')?.value || '#3b82f6';
+  const ordem = parseInt(document.getElementById('disciplina-ordem')?.value, 10) || 99;
+
+  if (!nome) {
+    if (typeof showToast === 'function') showToast('Digite o nome da disciplina', 'error');
+    else alert('Digite o nome da disciplina');
+    return;
+  }
+
+  const url = id ? `/api/disciplinas/${id}` : '/api/disciplinas';
+  const metodo = id ? 'PUT' : 'POST';
+  try {
+    const r = await apiFetch(API_URL + url, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, icone, cor, ordem })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const msg = data.erro || 'Erro ao salvar';
+      if (typeof showToast === 'function') showToast(msg, 'error');
+      else alert(msg);
+      return;
+    }
+    if (typeof showToast === 'function') showToast(id ? '✅ Disciplina atualizada' : '✅ Disciplina criada', 'success');
+    fecharModalDisciplina();
+    carregarDisciplinas();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Erro: ' + e.message, 'error');
+    else alert('Erro: ' + e.message);
+  }
+}
+
+async function excluirDisciplina(id, nome) {
+  if (!confirm(`Desativar a disciplina "${nome}"?\n\nEla não aparecerá mais em novas provas, mas o histórico é preservado.`)) return;
+  try {
+    const r = await apiFetch(API_URL + `/api/disciplinas/${id}`, { method: 'DELETE' });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      if (typeof showToast === 'function') showToast(data.erro || 'Erro ao excluir', 'error');
+      else alert(data.erro || 'Erro ao excluir');
+      return;
+    }
+    if (typeof showToast === 'function') showToast('✅ Disciplina desativada', 'success');
+    carregarDisciplinas();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Erro: ' + e.message, 'error');
+    else alert('Erro: ' + e.message);
+  }
+}
+
+// Chamar carregarDisciplinas() ao clicar no menu
+document.addEventListener('DOMContentLoaded', () => {
+  const menuDisc = document.querySelector('.sb-item[data-p="disciplinas"]');
+  if (menuDisc) {
+    menuDisc.addEventListener('click', () => setTimeout(carregarDisciplinas, 80));
+  }
+});
+
+// Interceptar go('disciplinas') para carregar quando navegar
+if (typeof go === 'function') {
+  const _goOriginal = window.go;
+  window.go = function(page) {
+    _goOriginal(page);
+    if (page === 'disciplinas') setTimeout(carregarDisciplinas, 80);
+  };
+}
