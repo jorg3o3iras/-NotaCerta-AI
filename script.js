@@ -2633,19 +2633,65 @@ async function carregarTurmasRelTurma(escolaId) {
     } catch (e) { console.error(e); }
     carregarRelatorioTurmaFiltrado();
 }
-function limparFiltrosRelTurma() {
-    document.getElementById('rel-turma-escola').value = '';
-    document.getElementById('rel-turma-serie').value = '';
-    document.getElementById('rel-turma-prova').value = '';
-    const st = document.getElementById('rel-turma-turma');
-    st.innerHTML = '<option value="">Selecione a turma</option>';
-    carregarTurmasComCache().then(turmas => {
-        if (turmas && !turmas.erro) { turmas.forEach(t => { const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' - ' + (t.serie || ''); o.dataset.serie = t.serie || ''; st.appendChild(o); }); carregarRelatorioTurmaFiltrado(); }
-    }).catch(e => console.error(e));
-    const sp = document.getElementById('rel-turma-prova');
-    carregarProvasComCache(true).then(provas => {
-        if (provas && !provas.erro) { sp.innerHTML = '<option value="">Selecione a prova</option>'; provas.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.titulo + ' - ' + (p.serie || '') + ' - ' + (p.disciplina || ''); o.dataset.disciplina = p.disciplina || ''; sp.appendChild(o); }); }
-    }).catch(e => console.error(e));
+async function limparFiltrosRelTurma() {
+    console.log('🧹 [Limpar] início');
+    try {
+        // 1) Limpa os valores de todos os selects
+        const ids = ['rel-turma-escola', 'rel-turma-serie', 'rel-turma-turma', 'rel-turma-prova'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                console.log(`🧹 [Limpar] ${id} → ""`);
+            } else {
+                console.warn(`⚠️ [Limpar] #${id} não existe`);
+            }
+        });
+
+        // 2) Repopula turma
+        const st = document.getElementById('rel-turma-turma');
+        if (st) {
+            st.innerHTML = '<option value="">Selecione a turma</option>';
+            const turmas = await carregarTurmasComCache();
+            if (turmas && !turmas.erro) {
+                turmas.forEach(t => {
+                    const o = document.createElement('option');
+                    o.value = t.id;
+                    o.textContent = t.nome + ' - ' + (t.serie || '');
+                    o.dataset.serie = t.serie || '';
+                    st.appendChild(o);
+                });
+                console.log(`🧹 [Limpar] turmas repopuladas: ${turmas.length}`);
+            }
+        }
+
+        // 3) Repopula prova
+        const sp = document.getElementById('rel-turma-prova');
+        if (sp) {
+            sp.innerHTML = '<option value="">Selecione a prova</option>';
+            const provas = await carregarProvasComCache(true);
+            if (provas && !provas.erro) {
+                provas.forEach(p => {
+                    const o = document.createElement('option');
+                    o.value = p.id;
+                    o.textContent = p.titulo + ' - ' + (p.serie || '') + ' - ' + (p.disciplina || '');
+                    o.dataset.disciplina = p.disciplina || '';
+                    sp.appendChild(o);
+                });
+                console.log(`🧹 [Limpar] provas repopuladas: ${provas.length}`);
+            }
+        }
+
+        // 4) SÓ AGORA recarrega o relatório
+        await carregarRelatorioTurmaFiltrado();
+        console.log('🧹 [Limpar] relatório recarregado');
+
+        // 5) Feedback visual
+        showToast('✕ Filtros limpos!', 'info');
+    } catch (e) {
+        console.error('❌ [Limpar] erro:', e);
+        showToast('❌ Erro ao limpar: ' + e.message, 'error');
+    }
 }
 async function carregarRelatorioTurmaFiltrado() {
     try {
