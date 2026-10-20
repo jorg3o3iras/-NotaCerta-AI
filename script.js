@@ -2879,6 +2879,7 @@ document.addEventListener('DOMContentLoaded', function() {
     popularSelectGabTotal();
     buildGabGrid();
     carregarCombos();
+	carregarEscolasCorrigir();
     carregarDados();
     carregarEscolasFiltroAlunos();
     const tp2 = document.getElementById('modal-prova-tipo');
