@@ -2360,9 +2360,7 @@ def historico_agrupado():
         resultado = []
         for _, d in alunos_map.items():
             av = d['avaliacoes']
-            default = {'nota': 0, 'acertos': 0, 'erros': 0, 'total': 20,
-                       'questoes_status': [], 'bncc': [], 'respostas': [], 'gabarito': []}
-                       'sem_avaliacao': True}
+            default = {'nota': 0, 'acertos': 0, 'erros': 0, 'total': 0, 'questoes_status': [], 'bncc': [], 'respostas': [], 'gabarito': [], 'sem_avaliacao': True}
             port = dict(av.get('Portugues', default))
             mat = dict(av.get('Matematica', default))
             prod = dict(av.get('Producao', default))
