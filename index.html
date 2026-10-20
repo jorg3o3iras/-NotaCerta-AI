@@ -118,6 +118,9 @@
             </div>
 
 <div class="sb-section">Sistema</div>
+<div class="sb-item" data-p="disciplinas" onclick="go('disciplinas')">
+<span class="sb-ico">📚</span> Disciplinas
+</div>
 <div class="sb-item" data-p="config" id="menu-config" onclick="go('config')">
 <span class="sb-ico">⚙️</span> Configurações
 </div>
@@ -1778,6 +1781,46 @@
 </div>
 </div>
 </div>
+<!-- ========== DISCIPLINAS ========== -->
+<div class="page" id="page-disciplinas">
+  <div class="page-header">
+    <div>
+      <div class="page-title">📚 Disciplinas</div>
+      <p class="page-sub">Gerencie as disciplinas da sua escola. As marcadas como <strong>Global</strong> valem para todas.</p>
+    </div>
+    <div class="page-actions no-print">
+      <button class="btn btn-primary" onclick="abrirModalDisciplina()">
+        + Nova Disciplina
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px;">Ícone</th>
+            <th>Nome</th>
+            <th style="width:100px;">Código</th>
+            <th style="width:80px;">Cor</th>
+            <th style="width:130px;">Escopo</th>
+            <th style="width:80px;">Ordem</th>
+            <th style="width:130px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tb-disciplinas">
+          <tr>
+            <td colspan="7" style="text-align:center; padding:30px; color:var(--text3);">
+              Carregando disciplinas...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- ========== USER PAGES ========== -->
 <div class="page" id="page-u-dashboard" style="display: none"></div>
 <div class="page" id="page-u-escola" style="display: none"></div>
@@ -2495,6 +2538,49 @@ Ana Lima" rows="3"></textarea>
 </div>
 </div>
 </div>
+<!-- MODAL DISCIPLINA -->
+<div class="modal-overlay no-print" id="m-disciplina">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="m-disciplina-titulo">📚 Nova Disciplina</h3>
+      <button class="modal-close" onclick="closeM('m-disciplina')">×</button>
+    </div>
+
+    <input id="disciplina-id" type="hidden"/>
+
+    <div class="form-row c1">
+      <div class="form-group">
+        <label class="form-label">Nome <span class="req">*</span></label>
+        <input class="form-control" id="disciplina-nome" placeholder="Ex: História, Geografia, Filosofia..."/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ícone (emoji)</label>
+        <input class="form-control" id="disciplina-icone" maxlength="4" placeholder="📚"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cor</label>
+        <input class="form-control" id="disciplina-cor" type="color" value="#3b82f6" style="height:38px; padding:4px;"/>
+      </div>
+    </div>
+
+    <div class="form-row c1">
+      <div class="form-group">
+        <label class="form-label">Ordem (menor aparece primeiro)</label>
+        <input class="form-control" id="disciplina-ordem" type="number" value="99" min="0" max="999"/>
+        <div class="form-hint">Use 1 para aparecer no topo, 99 para o final.</div>
+      </div>
+    </div>
+
+    <div class="modal-footer no-print">
+      <button class="btn btn-outline" onclick="closeM('m-disciplina')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarDisciplina()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VISUALIZAR PROVA -->
 <div class="modal-overlay no-print" id="m-visualizar-prova">
 <div class="modal" style="max-width: 750px; width: 95vw">
