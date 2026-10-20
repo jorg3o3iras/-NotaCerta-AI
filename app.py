@@ -259,13 +259,9 @@ if RELAY_API_URL:
     RELAY_AVAILABLE = True
     print("✅ RelayFreeLLM configurado!")
 
+# PYZBAR DESATIVADO — QR por foto usa OpenCV
 PYZBAR_AVAILABLE = False
-try:
-    from pyzbar.pyzbar import decode as _pyzbar_decode
-    PYZBAR_AVAILABLE = True
-    print("✅ pyzbar disponível")
-except Exception:
-     print("⚠️ pyzbar indisponível (DLL ausente) — QR por foto desativado, usando OpenCV")
+_pyzbar_decode = None
 
 # ============================================
 # DB POOL
