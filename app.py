@@ -265,8 +265,7 @@ try:
     PYZBAR_AVAILABLE = True
     print("✅ pyzbar disponível")
 except ImportError:
-    print("⚠️ pyzbar não instalado")
-
+    print("⚠️ pyzbar indisponível (DLL do zbar não instalada) — QR desativado")
 
 # ============================================
 # DB POOL
