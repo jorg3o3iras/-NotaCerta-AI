@@ -122,9 +122,12 @@ def get_escola_id():
     if not u.get('ativo', True): raise PermissionError('Usuário inativo')
     if u.get('perfil') == 'admin': return None
     eid = u.get('escola_id')
-    if not eid: raise PermissionError('Usuário não possui escola vinculada. Contate o administrador.')
+    if not eid:
+        # usuário sem escola vinculada → sem escopo (não bloqueia correções)
+        logging.warning(f"⚠️ Usuário '{u.get('username')}' sem escola vinculada — escopo desativado")
+        return None
     return int(eid)
-
+			
 
 def is_admin():
     u = get_usuario_atual()
