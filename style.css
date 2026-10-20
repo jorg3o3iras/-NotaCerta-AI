@@ -1018,3 +1018,45 @@ tr:hover td { background: rgba(255,255,255,0.03); }
 
     .print-only { display: block !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FIX: Centralizar o modal de Disciplinas na tela
+   (por padrão o modal-overlay do sistema já centraliza,
+   mas este bloco força 100% independente de conflitos)
+   ═══════════════════════════════════════════════════════════ */
+
+#m-disciplina.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    z-index: 9998 !important;
+    overflow: auto;
+}
+
+#m-disciplina.modal-overlay.show,
+#m-disciplina.modal-overlay[style*="flex"] {
+    display: flex !important;
+}
+
+#m-disciplina .modal {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    max-width: 480px !important;
+    width: 100% !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+}
