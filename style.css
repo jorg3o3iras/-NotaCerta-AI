@@ -1066,7 +1066,7 @@ tr:hover td { background: rgba(255,255,255,0.03); }
    ═══════════════════════════════════════════════════════════ */
 
 #page-disciplinas {
-    margin-left: 230px !important; /* Mesma margem do menu lateral */
+    margin-left: 50px !important; /* Mesma margem do menu lateral */
     width: calc(100% - 280px) !important;
     padding: 28px 32px !important;
     height: 100vh !important;
