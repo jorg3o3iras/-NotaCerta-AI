@@ -1355,7 +1355,7 @@ def excluir_disciplina(id):
         ex = cur.fetchone()
         if not ex:
             return jsonify({'erro': 'Disciplina não encontrada'}), 404
-        if ex['escola_id'] is None:
+        if ex['escola_id'] is None and escola_sessao is not None:
             return jsonify({'erro': 'Não pode excluir disciplina global'}), 403
         if escola_sessao is not None and ex['escola_id'] != escola_sessao:
             return jsonify({'erro': 'Acesso negado'}), 403
