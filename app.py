@@ -3651,7 +3651,8 @@ def init_db():
                     try: cur.execute(sql)
                     except: pass
 
-        # ── DISCIPLINAS (novo) ────────────────────────────
+        
+        # ── DISCIPLINAS (blindado — sem duplicação) ──────
         cur.execute("""CREATE TABLE IF NOT EXISTS disciplinas (
             id SERIAL PRIMARY KEY,
             escola_id INTEGER REFERENCES escolas(id) ON DELETE CASCADE,
@@ -3661,6 +3662,16 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(escola_id, codigo))""")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_disciplinas_escola ON disciplinas(escola_id, ordem)")
+
+        # 1) Auto-limpeza: remove duplicatas a cada boot
+        cur.execute("""
+            DELETE FROM disciplinas
+            WHERE id NOT IN (
+                SELECT MIN(id) FROM disciplinas GROUP BY escola_id, codigo
+            )
+        """)
+
+        # 2) Insere só o que falta (NULL-safe)
         for _cod, _nome, _cor, _ico, _ord in [
             ('PORT', 'Português',         '#ef4444', '📖', 1),
             ('MAT',  'Matemática',        '#3b82f6', '🔢', 2),
@@ -3668,10 +3679,17 @@ def init_db():
             ('CH',   'Ciências Humanas',  '#f59e0b', '🌍', 4),
             ('CN',   'Ciências Naturais', '#10b981', '🔬', 5),
         ]:
-            cur.execute("""INSERT INTO disciplinas (escola_id, codigo, nome, cor, icone, ordem)
-                VALUES (NULL, %s, %s, %s, %s, %s)
-                ON CONFLICT (escola_id, codigo) DO NOTHING""",
-                (_cod, _nome, _cor, _ico, _ord))
+            cur.execute(
+                "SELECT 1 FROM disciplinas WHERE escola_id IS NULL AND codigo = %s",
+                (_cod,)
+            )
+            if cur.fetchone() is None:
+                cur.execute(
+                    """INSERT INTO disciplinas (escola_id, codigo, nome, cor, icone, ordem)
+                       VALUES (NULL, %s, %s, %s, %s, %s)""",
+                    (_cod, _nome, _cor, _ico, _ord)
+                )
+        # ──────────────────────────────────────────────────
         # ──────────────────────────────────────────────────
 
         cur.execute("""CREATE TABLE IF NOT EXISTS cartoes_template (
