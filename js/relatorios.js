@@ -235,11 +235,478 @@ function imprimirRelatorioTurma() {
     if (!table) { showToast('❌ Sem dados!', 'error'); return; }
     const rows = table.querySelectorAll('tbody tr');
     if (rows.length === 0) { showToast('⚠ Sem dados', 'error'); return; }
-    let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório</title><style>body{font-family:Arial;margin:20px;font-size:11px;}h1{text-align:center;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:5px;text-align:center;}th{background:#f2f2f2;}</style></head><body>';
-    html += '<h1>📊 Relatório por Turma</h1>';
-    html += table.outerHTML;
-    html += '</body></html>';
+
+    // ─── Captura dados dos filtros ───────────────────────
+    const es = document.getElementById('rel-turma-escola');
+    const se = document.getElementById('rel-turma-serie');
+    const tu = document.getElementById('rel-turma-turma');
+    const pr = document.getElementById('rel-turma-prova');
+    const en = es?.options[es.selectedIndex]?.text || '—';
+    const sn = se?.options[se.selectedIndex]?.text || '—';
+    const tn = tu?.options[tu.selectedIndex]?.text || '—';
+    const pn = pr?.options[pr.selectedIndex]?.text || '—';
+    const disciplina = document.getElementById('rel-disciplina-nome')?.textContent || '—';
+
+    // ─── Captura métricas dos cards de resumo ────────────
+    const totalAlunos = document.getElementById('rel-total-alunos-tabela')?.textContent || '0';
+    const totalAcertos = document.getElementById('rel-disc-acertos')?.textContent || '0';
+    const totalErros = document.getElementById('rel-disc-erros')?.textContent || '0';
+    const media = document.getElementById('rel-disc-media')?.textContent || '0.0';
+    const conceito = document.getElementById('rel-disc-conceito')?.textContent || '—';
+    const totalCorrecoes = document.getElementById('rel-total-correcoes')?.textContent || '0 correções';
+
+    // ─── Mapeia cabeçalhos da tabela ─────────────────────
+    const thead = table.querySelector('thead');
+    const theadRows = thead?.querySelectorAll('tr') || [];
+    let colunas = [];
+    if (theadRows.length > 1) {
+        const r1 = theadRows[0].querySelectorAll('th');
+        const r2 = theadRows[1].querySelectorAll('th');
+        let i2 = 0;
+        r1.forEach(th1 => {
+            const cs = parseInt(th1.getAttribute('colspan')) || 1;
+            const rs = parseInt(th1.getAttribute('rowspan')) || 1;
+            const txt = th1.textContent.trim();
+            if (rs === 2) colunas.push({ tipo: 'fixa', nome: txt });
+            else {
+                const subs = [];
+                for (let k = 0; k < cs; k++) subs.push(r2[i2 + k]?.textContent.trim() || '');
+                i2 += cs;
+                colunas.push({ tipo: 'disc', nome: txt, sub: subs });
+            }
+        });
+    } else {
+        theadRows[0]?.querySelectorAll('th').forEach(th => colunas.push({ tipo: 'fixa', nome: th.textContent.trim() }));
+    }
+
+    // ─── Coleta linhas de dados ──────────────────────────
+    const dados = [];
+    rows.forEach(r => {
+        const c = r.querySelectorAll('td');
+        if (c.length === 0) return;
+        const ln = [];
+        c.forEach(x => ln.push(x.textContent.trim()));
+        if (ln.length >= 4) dados.push(ln);
+    });
+    if (dados.length === 0) { showToast('⚠ Sem alunos', 'error'); return; }
+
+    // ─── Monta HTML do cabeçalho ─────────────────────────
+    let th1 = '<tr>', th2 = '<tr>';
+    colunas.forEach(c => {
+        if (c.tipo === 'fixa') {
+            th1 += `<th rowspan="2">${escapeHtml(c.nome)}</th>`;
+        } else {
+            th1 += `<th colspan="${c.sub.length}" class="col-disc">${escapeHtml(c.nome)}</th>`;
+            c.sub.forEach(s => { th2 += `<th class="sub-header">${escapeHtml(s)}</th>`; });
+        }
+    });
+    th1 += '</tr>';
+    th2 += '</tr>';
+
+    // ─── Monta linhas do body ────────────────────────────
+    let body = '';
+    dados.forEach(ln => {
+        body += '<tr>';
+        ln.forEach((v, i) => {
+            const sub = colunas.find(c => c.tipo === 'fixa') ? null : null;
+            // Colore colunas numéricas (acertos/erros/nota)
+            const isMedal = i === 0 && (v === '🥇' || v === '🥈' || v === '🥉');
+            const isNota = i > 0 && /^\d+\.?\d*$/.test(v) && v.length < 6;
+            const cls = isMedal ? 'medal' : '';
+            body += `<td class="${cls}" ${isMedal ? 'style="font-size:16px;text-align:center;"' : ''}>${escapeHtml(v)}</td>`;
+        });
+        body += '</tr>';
+    });
+
+    // ─── Data por extenso ────────────────────────────────
+    const data = new Date();
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const dataExt = `${data.getDate()} de ${meses[data.getMonth()]} de ${data.getFullYear()}`;
+    const dataCurta = data.toLocaleDateString('pt-BR');
+    const hora = data.toLocaleTimeString('pt-BR').slice(0, 5);
+    const orient = colunas.length > 8 ? 'landscape' : 'portrait';
+
+    // ─── HTML final ──────────────────────────────────────
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório por Turma — ${escapeHtml(tn)}</title>
+<style>
+  @page { size: A4 ${orient}; margin: 12mm 10mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10px;
+    color: #1f2937;
+    line-height: 1.4;
+  }
+
+  /* ─── Cabeçalho institucional ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 10px;
+    border-bottom: 3px double #1e3a8a;
+    margin-bottom: 12px;
+  }
+  .logo {
+    width: 55px; height: 55px;
+    background: linear-gradient(135deg, #1e40af, #7c3aed);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(30, 64, 175, 0.25);
+  }
+  .header-text { flex: 1; }
+  .header-text h1 {
+    font-size: 14pt;
+    font-weight: 900;
+    color: #1e3a8a;
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  .header-text h1 span { color: #7c3aed; }
+  .header-text .sub {
+    font-size: 8.5pt;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .header-text .system {
+    font-size: 7.5pt;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 7.5pt;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+  .header-meta strong { color: #1e3a8a; }
+
+  /* ─── Título do relatório ─── */
+  .title-bar {
+    background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+  }
+  .title-bar h2 {
+    font-size: 13pt;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+  .title-bar .subtitle {
+    font-size: 8.5pt;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+
+  /* ─── Grid de metadados ─── */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    background: #f8fafc;
+    padding: 10px 12px;
+    border-left: 4px solid #1e3a8a;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 12px;
+    font-size: 8.5pt;
+  }
+  .meta-item strong {
+    display: block;
+    color: #64748b;
+    font-size: 7pt;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .meta-item span {
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 9pt;
+  }
+
+  /* ─── Cards de resumo ─── */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .card {
+    padding: 10px 8px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1.5px solid;
+    background: #fff;
+  }
+  .card .value {
+    font-size: 18pt;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .card .label {
+    font-size: 6.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    opacity: 0.85;
+  }
+  .card-blue { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .card-green { background: #ecfdf5; border-color: #10b981; color: #047857; }
+  .card-red { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+  .card-purple { background: #f5f3ff; border-color: #8b5cf6; color: #6d28d9; }
+  .card-orange { background: #fff7ed; border-color: #f59e0b; color: #c2410c; }
+
+  /* ─── Tabela ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 12px;
+    border: 1.5px solid #1e3a8a;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  thead tr:first-child th {
+    background: #1e3a8a;
+    color: #fff;
+    padding: 7px 6px;
+    font-size: 7.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid #1e40af;
+  }
+  thead tr:nth-child(2) th.sub-header {
+    background: #3b82f6;
+    color: #fff;
+    padding: 5px 4px;
+    font-size: 6.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid #2563eb;
+  }
+  thead th.col-disc { background: #0f172a; }
+  tbody td {
+    padding: 5px 6px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    color: #334155;
+  }
+  tbody td:nth-child(3) {
+    text-align: left;
+    font-weight: 700;
+    color: #0f172a;
+    padding-left: 8px;
+  }
+  tbody tr:nth-child(even) td { background: #f8fafc; }
+  tbody tr:hover td { background: #eff6ff; }
+  tbody td.medal {
+    font-size: 14px;
+    background: #fefce8 !important;
+    border-color: #fde047;
+  }
+  tbody tr:first-child td { background: #fefce8 !important; font-weight: 700; }
+  tbody tr:nth-child(2) td { background: #f0f9ff !important; }
+  tbody tr:nth-child(3) td { background: #fff7ed !important; }
+
+  /* ─── Rodapé ─── */
+  .footer-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 8pt;
+    color: #64748b;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .footer-info strong { color: #1e3a8a; }
+
+  .signatures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 40px;
+    margin-bottom: 15px;
+  }
+  .signature-line {
+    border-top: 1.5px solid #1e293b;
+    padding-top: 4px;
+    text-align: center;
+    font-size: 8pt;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 25px;
+  }
+  .signature-line small {
+    display: block;
+    font-size: 7pt;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .footer {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #cbd5e1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #94a3b8;
+  }
+  .footer strong { color: #1e3a8a; }
+
+  /* ─── Impressão ─── */
+  @media print {
+    body { padding: 0; }
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    tbody tr:hover td { background: inherit !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ CABEÇALHO INSTITUCIONAL ═══════ -->
+<div class="header">
+  <div class="logo">🤖</div>
+  <div class="header-text">
+    <h1>Nota<span>Certa</span> AI</h1>
+    <div class="sub">Sistema Inteligente de Correção de Provas</div>
+    <div class="system">SECRETARIA MUNICIPAL DE EDUCAÇÃO — SISAM 2026</div>
+  </div>
+  <div class="header-meta">
+    <div><strong>Emissão:</strong> ${dataCurta} às ${hora}</div>
+    <div><strong>Página:</strong> 1 de 1</div>
+    <div><strong>Doc:</strong> REL-TURMA</div>
+  </div>
+</div>
+
+<!-- ═══════ TÍTULO DO RELATÓRIO ═══════ -->
+<div class="title-bar">
+  <h2>📊 RELATÓRIO DE DESEMPENHO POR TURMA</h2>
+  <div class="subtitle">Análise de acertos, erros e conceito por aluno · ${escapeHtml(disciplina)}</div>
+</div>
+
+<!-- ═══════ METADADOS DOS FILTROS ═══════ -->
+<div class="meta-grid">
+  <div class="meta-item">
+    <strong>🏫 Escola</strong>
+    <span>${escapeHtml(en)}</span>
+  </div>
+  <div class="meta-item">
+    <strong>🎓 Série</strong>
+    <span>${escapeHtml(sn)}</span>
+  </div>
+  <div class="meta-item">
+    <strong>👥 Turma</strong>
+    <span>${escapeHtml(tn)}</span>
+  </div>
+  <div class="meta-item">
+    <strong>📑 Prova</strong>
+    <span>${escapeHtml(pn)}</span>
+  </div>
+</div>
+
+<!-- ═══════ CARDS DE RESUMO ═══════ -->
+<div class="summary-cards">
+  <div class="card card-blue">
+    <div class="value">${escapeHtml(totalAlunos.replace('alunos', '').trim())}</div>
+    <div class="label">Alunos</div>
+  </div>
+  <div class="card card-green">
+    <div class="value">${escapeHtml(totalAcertos)}</div>
+    <div class="label">Acertos</div>
+  </div>
+  <div class="card card-red">
+    <div class="value">${escapeHtml(totalErros)}</div>
+    <div class="label">Erros</div>
+  </div>
+  <div class="card card-purple">
+    <div class="value">${escapeHtml(media)}</div>
+    <div class="label">Média</div>
+  </div>
+  <div class="card card-orange">
+    <div class="value" style="font-size:11pt;">${escapeHtml(conceito)}</div>
+    <div class="label">Conceito</div>
+  </div>
+</div>
+
+<!-- ═══════ TABELA DE ALUNOS ═══════ -->
+<table>
+  <thead>
+    ${th1}
+    ${th2}
+  </thead>
+  <tbody>
+    ${body}
+  </tbody>
+</table>
+
+<!-- ═══════ RODAPÉ INFORMATIVO ═══════ -->
+<div class="footer-info">
+  <span>📋 <strong>Total de correções:</strong> ${escapeHtml(totalCorrecoes)}</span>
+  <span>📅 <strong>Data de emissão:</strong> ${dataExt}</span>
+  <span>🎓 <strong>Disciplina:</strong> ${escapeHtml(disciplina)}</span>
+  <span>📊 <strong>Conceito geral:</strong> ${escapeHtml(conceito)}</span>
+</div>
+
+<!-- ═══════ ASSINATURAS ═══════ -->
+<div class="signatures">
+  <div>
+    <div class="signature-line">
+      Professor(a) Responsável
+      <small>${escapeHtml(disciplina)}</small>
+    </div>
+  </div>
+  <div>
+    <div class="signature-line">
+      Coordenação Pedagógica
+      <small>Visto / Carimbo</small>
+    </div>
+  </div>
+  <div>
+    <div class="signature-line">
+      Direção da Escola
+      <small>Visto / Carimbo</small>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ RODAPÉ LEGAL ═══════ -->
+<div class="footer">
+  <span>Gerado por <strong>NotaCerta AI</strong> · ${dataCurta} ${hora}</span>
+  <span>Documento oficial — válido com assinatura e carimbo</span>
+  <span>www.notacerta.com.br</span>
+</div>
+
+</body>
+</html>`;
+
     const w = window.open('', '_blank');
-    if (!w) { showToast('⚠ Pop-up!', 'error'); return; }
-    w.document.write(html); w.document.close(); w.focus(); w.print();
+    if (!w) { showToast('⚠ Permitir pop-ups para imprimir', 'error'); return; }
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => setTimeout(() => { w.focus(); w.print(); }, 500);
+    showToast('🖨 Preparando impressão...', 'success');
 }
