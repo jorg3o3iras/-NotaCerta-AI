@@ -17,7 +17,6 @@ async function carregarFiltrosRelTurma() {
             });
             if (c) se.value = c;
         }
-        // Popular turmas/séries/provas com base na escola atual (ou tudo se vazio)
         const escolaAtual = se ? se.value : '';
         await carregarTurmasRelTurma(escolaAtual);
     } catch (e) { console.error('carregarFiltrosRelTurma:', e); }
@@ -28,23 +27,13 @@ async function carregarTurmasRelTurma(escolaId) {
     const ss = document.getElementById('rel-turma-serie');
     const sp = document.getElementById('rel-turma-prova');
     if (!st || !ss || !sp) return;
-
-    // Reset
     st.innerHTML = '<option value="">Selecione a turma</option>';
     ss.innerHTML = '<option value="">Selecione a série</option>';
     sp.innerHTML = '<option value="">Selecione a prova</option>';
-
     try {
-        // 1) Buscar turmas (filtradas por escola, se definida)
-        const turmas = escolaId
-            ? await carregarTurmasComCache(escolaId)
-            : await carregarTurmasComCache();
-
-        // 2) Popular select de SÉRIE com as séries únicas existentes
+        const turmas = escolaId ? await carregarTurmasComCache(escolaId) : await carregarTurmasComCache();
         if (turmas && !turmas.erro) {
-            const seriesUnicas = [...new Set(
-                turmas.map(t => t.serie).filter(s => s && s.trim())
-            )].sort((a, b) => {
+            const seriesUnicas = [...new Set(turmas.map(t => t.serie).filter(s => s && s.trim()))].sort((a, b) => {
                 const na = parseInt((a.match(/\d+/) || [0])[0]);
                 const nb = parseInt((b.match(/\d+/) || [0])[0]);
                 return na - nb;
@@ -55,8 +44,6 @@ async function carregarTurmasRelTurma(escolaId) {
                 o.textContent = s;
                 ss.appendChild(o);
             });
-
-            // 3) Popular select de TURMA
             turmas.forEach(t => {
                 const o = document.createElement('option');
                 o.value = t.id;
@@ -65,11 +52,8 @@ async function carregarTurmasRelTurma(escolaId) {
                 st.appendChild(o);
             });
         }
-
-        // 4) Popular PROVA (filtrada por escola)
         await carregarProvasRelTurma(escolaId, null);
     } catch (e) { console.error('carregarTurmasRelTurma:', e); }
-
     carregarRelatorioTurmaFiltrado();
 }
 
@@ -78,7 +62,6 @@ async function carregarProvasRelTurma(escolaId, serie) {
     if (!sp) return;
     const valorAnterior = sp.value;
     sp.innerHTML = '<option value="">Selecione a prova</option>';
-
     try {
         const provas = await carregarProvasComCache();
         if (provas && !provas.erro) {
@@ -98,8 +81,6 @@ async function carregarProvasRelTurma(escolaId, serie) {
                 o.dataset.serie = p.serie || '';
                 sp.appendChild(o);
             });
-
-            // Restaurar seleção se ainda existir
             if (valorAnterior) {
                 const existe = Array.from(sp.options).some(o => o.value === valorAnterior);
                 if (existe) sp.value = valorAnterior;
@@ -108,39 +89,26 @@ async function carregarProvasRelTurma(escolaId, serie) {
     } catch (e) { console.error('carregarProvasRelTurma:', e); }
 }
 
-// ─── HANDLERS ONCHANGE ────────────────────────────────
-
-function onRelTurmaEscolaChange(escolaId) {
-    carregarTurmasRelTurma(escolaId);
-}
-
+function onRelTurmaEscolaChange(escolaId) { carregarTurmasRelTurma(escolaId); }
 function onRelTurmaSerieChange(serie) {
-    // Filtrar turmas exibidas pela série
     const st = document.getElementById('rel-turma-turma');
     if (st) {
-        // Resetar seleção de turma se não pertence à série
         const optAtual = st.options[st.selectedIndex];
-        if (optAtual && optAtual.dataset.serie && optAtual.dataset.serie !== serie) {
-            st.value = '';
-        }
+        if (optAtual && optAtual.dataset.serie && optAtual.dataset.serie !== serie) st.value = '';
         Array.from(st.options).forEach(opt => {
             if (!opt.dataset.serie) return;
             opt.style.display = (!serie || opt.dataset.serie === serie) ? '' : 'none';
         });
     }
-    // Filtrar provas pela escola + série
     const escolaId = document.getElementById('rel-turma-escola')?.value || '';
     carregarProvasRelTurma(escolaId, serie || null);
     carregarRelatorioTurmaFiltrado();
 }
-
 function onRelTurmaTurmaChange(turmaId) {
     const st = document.getElementById('rel-turma-turma');
     const ss = document.getElementById('rel-turma-serie');
     const opt = st?.options[st.selectedIndex];
     const serie = opt?.dataset?.serie || '';
-
-    // Se o usuário escolheu uma turma mas não escolheu série, preencher automaticamente
     if (serie && ss && !ss.value) {
         ss.value = serie;
         const escolaId = document.getElementById('rel-turma-escola')?.value || '';
@@ -148,15 +116,12 @@ function onRelTurmaTurmaChange(turmaId) {
     }
     carregarRelatorioTurmaFiltrado();
 }
-
 async function limparFiltrosRelTurma() {
     try {
-        // Limpar todos os selects
         ['rel-turma-escola', 'rel-turma-serie', 'rel-turma-turma', 'rel-turma-prova'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
-        // Repopular tudo (sem escola selecionada → mostra tudo)
         await carregarFiltrosRelTurma();
         await carregarRelatorioTurmaFiltrado();
         showToast('✕ Filtros limpos!', 'info');
@@ -166,8 +131,6 @@ async function limparFiltrosRelTurma() {
     }
 }
 
-// ─── RELATÓRIO (mantido igual ao original) ─────────────
-
 async function carregarRelatorioTurmaFiltrado() {
     try {
         const ei = document.getElementById('rel-turma-escola').value;
@@ -176,18 +139,16 @@ async function carregarRelatorioTurmaFiltrado() {
         const sp = document.getElementById('rel-turma-prova');
         const pi = sp.value;
         const op = sp.options[sp.selectedIndex];
-
         const dm = {
-            'Português':         { k: 'portugues',  label: 'Português' },
-            'Matemática':        { k: 'matematica', label: 'Matemática' },
-            'Produção de Texto': { k: 'producao',   label: 'Produção', prod: true },
-            'Ciências Humanas':  { k: 'ch',         label: 'CH' },
-            'Ciências Naturais': { k: 'cn',         label: 'CN' },
-            'História':          { k: 'ch',         label: 'CH' },
-            'Geografia':         { k: 'ch',         label: 'CH' },
-            'Inglês':            { k: 'portugues',  label: 'Português' }
+            'Português': { k: 'portugues', label: 'Português' },
+            'Matemática': { k: 'matematica', label: 'Matemática' },
+            'Produção de Texto': { k: 'producao', label: 'Produção', prod: true },
+            'Ciências Humanas': { k: 'ch', label: 'CH' },
+            'Ciências Naturais': { k: 'cn', label: 'CN' },
+            'História': { k: 'ch', label: 'CH' },
+            'Geografia': { k: 'ch', label: 'CH' },
+            'Inglês': { k: 'portugues', label: 'Português' }
         };
-
         let discSel = '';
         if (op && op.value && op.dataset.disciplina) discSel = op.dataset.disciplina;
         else {
@@ -200,7 +161,6 @@ async function carregarRelatorioTurmaFiltrado() {
                 }
             }
         }
-
         if (!discSel) {
             const tb = document.getElementById('tb-rel-alunos');
             if (tb) tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
@@ -215,19 +175,16 @@ async function carregarRelatorioTurmaFiltrado() {
             if (c) c.style.display = 'none';
             return;
         }
-
         const info = dm[discSel] || { k: 'portugues', label: 'Português' };
         const discKey = info.k;
         const isProd = !!info.prod;
-
         let alunosTurma = [];
         if (ti) {
             try {
                 const d = await carregarAlunosComCache({ turma_id: ti });
                 if (d && !d.erro && Array.isArray(d)) alunosTurma = d;
-            } catch (e) { /* ignore */ }
+            } catch (e) {}
         }
-
         let url = API_URL + '/api/historico/agrupado';
         const p = new URLSearchParams();
         if (ei) p.append('escola', ei);
@@ -237,7 +194,6 @@ async function carregarRelatorioTurmaFiltrado() {
         if (p.toString()) url += '?' + p.toString();
         const r = await apiFetch(url);
         const agrup = await r.json();
-
         const com = [];
         if (agrup && !agrup.erro && Array.isArray(agrup)) {
             agrup.forEach(a => {
@@ -245,49 +201,33 @@ async function carregarRelatorioTurmaFiltrado() {
                 if (dd && typeof dd === 'object' && !dd.sem_avaliacao && (dd.data || dd.prova) && (dd.total > 0 || dd.nota > 0)) {
                     const ac = dd.acertos || 0;
                     const tot = (typeof dd.total === 'number' && dd.total > 0) ? dd.total : (dd.nota > 0 ? 10 : 0);
-                    com.push({
-                        ...a,
-                        dados: {
-                            ac, er: Math.max(0, tot - ac), tot,
-                            pct: tot > 0 ? Math.round((ac / tot) * 100) : 0,
-                            nota: dd.nota || 0
-                        }
-                    });
+                    com.push({ ...a, dados: { ac, er: Math.max(0, tot - ac), tot, pct: tot > 0 ? Math.round((ac / tot) * 100) : 0, nota: dd.nota || 0 } });
                 }
             });
         }
-
         const sem = [];
         if (alunosTurma.length > 0) {
             const ids = new Set(com.map(a => a.aluno_id));
             alunosTurma.forEach(a => {
                 if (!ids.has(a.id)) {
-                    sem.push({
-                        aluno_id: a.id, aluno_nome: a.nome,
-                        serie: a.turma_serie || se, numero_chamada: a.numero_chamada,
-                        dados: { ac: 0, er: 0, tot: 0, pct: 0, nota: 0, sem_avaliacao: true }
-                    });
+                    sem.push({ aluno_id: a.id, aluno_nome: a.nome, serie: a.turma_serie || se, numero_chamada: a.numero_chamada, dados: { ac: 0, er: 0, tot: 0, pct: 0, nota: 0, sem_avaliacao: true } });
                 }
             });
         }
-
         const totalC = com.length;
         setText('rel-total-alunos-tabela', totalC + ' alunos');
         setText('rel-total-correcoes', totalC + ' correções');
-        let somaAc = 0;
-        com.forEach(a => somaAc += a.dados.ac);
+        let somaAc = 0; com.forEach(a => somaAc += a.dados.ac);
         setText('rel-disc-acertos', somaAc);
         setText('rel-disc-erros', totalC > 0 ? com.reduce((s, a) => s + a.dados.er, 0) : 0);
         setText('rel-disc-media', totalC > 0 ? (somaAc / totalC).toFixed(1) : '0.0');
         const mediaPct = totalC > 0 ? Math.round(com.reduce((s, a) => s + a.dados.pct, 0) / totalC) : 0;
         setText('rel-disciplina-nome', info.label);
         setText('rel-disc-conceito', calcularConceito(mediaPct));
-
         const table = document.querySelector('#tb-rel-alunos')?.closest('table');
         const thead = table?.querySelector('thead');
         const cols = isProd ? 1 : 3;
         if (thead) thead.innerHTML = `<tr><th>POS.</th><th>Nº</th><th>NOME</th><th>SÉRIE</th><th colspan="${cols}">${info.label.toUpperCase()}</th></tr><tr>${Array(4).fill('<th></th>').join('')}${isProd ? '<th>NOTA</th>' : '<th>ACERTOS</th><th>ERROS</th><th>NOTA</th>'}</tr>`;
-
         const tb = document.getElementById('tb-rel-alunos');
         if (!tb) return;
         const all = [...com, ...sem];
@@ -295,7 +235,6 @@ async function carregarRelatorioTurmaFiltrado() {
             tb.innerHTML = `<tr><td colspan="${4 + cols}" style="text-align:center;padding:30px;color:var(--text3);">Nenhum aluno encontrado com os filtros selecionados</td></tr>`;
             return;
         }
-
         all.sort((a, b) => b.dados.pct - a.dados.pct);
         tb.innerHTML = all.map((a, ix) => {
             const d = a.dados;
@@ -307,7 +246,6 @@ async function carregarRelatorioTurmaFiltrado() {
             else cel = `<td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td>`;
             return `<tr><td style="text-align:center;">${med}</td><td style="text-align:center;">${a.numero_chamada || (ix + 1)}</td><td style="padding-left:10px;"><strong>${escapeHtml(a.aluno_nome || '—')}</strong></td><td style="text-align:center;"><span class="badge badge-purple" style="font-size:9px;">${escapeHtml(a.serie || '—')}</span></td>${cel}</tr>`;
         }).join('');
-
         if (isProd) {
             const c = document.getElementById('rel-acertos-por-questao');
             if (c) c.style.display = 'none';
@@ -345,18 +283,10 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 if (!map.has(num)) map.set(num, { acertos: 0, erros: 0, gabarito: '', bncc: '', contagem: {} });
                 const dd = map.get(num);
                 const r = q.resposta || '', g = q.gabarito || '';
-                // Guarda gabarito oficial (primeiro válido encontrado)
-                if (!dd.gabarito && g && g !== '—' && g !== '-') {
-                    dd.gabarito = String(g).toUpperCase().trim();
-                }
-                // Guarda BNCC (primeiro válido)
+                if (!dd.gabarito && g && g !== '—' && g !== '-') dd.gabarito = String(g).toUpperCase().trim();
                 if (!dd.bncc && q.bncc) dd.bncc = String(q.bncc).trim();
-                // Contabiliza a resposta do aluno
                 const rv = r && r !== '—' && r !== '-';
-                if (rv) {
-                    const letra = String(r).toUpperCase().trim();
-                    dd.contagem[letra] = (dd.contagem[letra] || 0) + 1;
-                }
+                if (rv) { const letra = String(r).toUpperCase().trim(); dd.contagem[letra] = (dd.contagem[letra] || 0) + 1; }
                 const ic = rv && r.toUpperCase() === g.toUpperCase();
                 if (ic || q.acertou === true) { dd.acertos++; totalAc++; } else { dd.erros++; totalEr++; }
             });
@@ -374,18 +304,18 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 return;
             }
 
-            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO ═══════════
+            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO - CENTRALIZADO ═══════════
             const gabaritoInline = keys.map(num => {
                 const d = map.get(num);
                 return `<span style="background:rgba(139,92,246,.15);color:#a78bfa;padding:3px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);">Q${num}: <strong>${d.gabarito || '?'}</strong></span>`;
             }).join(' ');
             const cab = document.createElement('div');
-            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);';
+            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;';
             cab.innerHTML = `
-                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center;">
                     📋 Gabarito Oficial da Prova
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:5px;">${gabaritoInline}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%;">${gabaritoInline}</div>
             `;
             cont.appendChild(cab);
 
@@ -397,31 +327,23 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 div.className = 'acertos-por-questao-item';
                 div.style.cssText = 'background:var(--surface);border-radius:10px;padding:12px 8px;border:1px solid var(--border);text-align:center;position:relative;';
                 const cb = pa >= 80 ? '#10b981' : pa >= 60 ? '#f59e0b' : '#ef4444';
-
-                // Resposta mais comum do(s) aluno(s)
                 const respOrdenado = Object.entries(d.contagem).sort((a, b) => b[1] - a[1]);
                 const respTop = respOrdenado.length > 0 ? respOrdenado[0][0] : '';
                 const respAcertou = respTop && d.gabarito && respTop === d.gabarito;
                 const corResp = !respTop ? '#94a3b8' : (respAcertou ? '#10b981' : '#ef4444');
-
-                // Breakdown completo de todas as respostas
                 const letras = Object.keys(d.contagem).sort();
                 const breakdown = letras.length > 0 ? letras.map(l => {
                     const qtd = d.contagem[l];
                     const isGab = l === d.gabarito;
                     return `<span style="font-size:9px;font-weight:700;color:${isGab ? '#10b981' : '#ef4444'};background:${isGab ? 'rgba(16,185,129,.12)' : 'rgba(239,68,68,.10)'};padding:1px 5px;border-radius:3px;font-family:'Courier New',monospace;border:1px solid ${isGab ? 'rgba(16,185,129,.3)' : 'rgba(239,68,68,.2)'};">${l}:${qtd}</span>`;
                 }).join(' ') : '<span style="font-size:9px;color:var(--text3);">sem respostas</span>';
-
                 div.innerHTML = `
                     <div style="font-size:14px;font-weight:800;margin-bottom:5px;">Q${num}</div>
-
                     <div style="display:flex;justify-content:center;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
                         <span style="font-size:10px;font-weight:800;color:#a78bfa;background:rgba(139,92,246,.15);padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);" title="Gabarito oficial">GAB: ${d.gabarito || '?'}</span>
                         ${respTop ? `<span style="font-size:10px;font-weight:800;color:${corResp};background:${corResp}22;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid ${corResp}55;" title="Resposta do aluno">RESP: ${respTop} ${respAcertou ? '✓' : '✗'}</span>` : ''}
                     </div>
-
                     <div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:7px;">${breakdown}</div>
-
                     <div style="display:flex;justify-content:center;gap:4px;font-size:16px;font-weight:700;">
                         <span style="color:var(--green);">${d.acertos}</span>
                         <span style="color:var(--text3);">/</span>
