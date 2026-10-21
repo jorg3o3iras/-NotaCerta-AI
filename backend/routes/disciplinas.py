@@ -66,11 +66,18 @@ def criar_disciplina():
         conn = get_db_connection()
         if not conn: return jsonify({'erro': 'Banco indisponível'}), 503
         cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # ── Fix defensivo: ordem None-safe ───────────────────
+        try:
+            ordem = int(data.get('ordem') if data.get('ordem') is not None else 99)
+        except (ValueError, TypeError):
+            ordem = 99
+
         cur.execute("""INSERT INTO disciplinas (escola_id, codigo, nome, cor, icone, ordem)
             VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT (escola_id, codigo) DO NOTHING
             RETURNING id, codigo, nome, cor, icone, ordem, escola_id, ativo""",
             (escola_sessao, codigo, nome, data.get('cor', '#3b82f6'),
-             data.get('icone', '📚'), int(data.get('ordem', 99))))
+             data.get('icone', '📚'), ordem))
         row = cur.fetchone(); conn.commit(); cur.close()
         if not row:
             return jsonify({'erro': f'Já existe disciplina com código "{codigo}" nesta escola'}), 400
