@@ -38,6 +38,51 @@ function renderizarDisciplinas(lista) {
   }).join('');
 }
 
+// ═══════════════════════════════════════════════════════════
+// POPULA OS SELECTS DE DISCIPLINA A PARTIR DA API
+// ═══════════════════════════════════════════════════════════
+async function carregarDisciplinasParaSelects() {
+  try {
+    const r = await apiFetch(API_URL + '/api/disciplinas');
+    const lista = await r.json();
+    if (!Array.isArray(lista) || lista.length === 0) return;
+
+    // 1) Select de Disciplina na página "Cadastrar Prova"
+    const selProva = document.getElementById('prova-disciplina');
+    if (selProva) {
+      const valorAtual = selProva.value;
+      selProva.innerHTML = '<option value="">Selecione...</option>';
+      lista.forEach(d => {
+        const o = document.createElement('option');
+        o.value = d.nome;
+        o.textContent = (d.icone ? d.icone + ' ' : '') + d.nome;
+        selProva.appendChild(o);
+      });
+      if (valorAtual) {
+        const existe = Array.from(selProva.options).some(o => o.value === valorAtual);
+        if (existe) selProva.value = valorAtual;
+      }
+    }
+
+    // 2) Select de Disciplina no modal "m-prova"
+    const selModal = document.getElementById('modal-prova-disciplina');
+    if (selModal) {
+      const valorAtual = selModal.value;
+      selModal.innerHTML = '<option value="">Selecione...</option>';
+      lista.forEach(d => {
+        const o = document.createElement('option');
+        o.value = d.nome;
+        o.textContent = (d.icone ? d.icone + ' ' : '') + d.nome;
+        selModal.appendChild(o);
+      });
+      if (valorAtual) {
+        const existe = Array.from(selModal.options).some(o => o.value === valorAtual);
+        if (existe) selModal.value = valorAtual;
+      }
+    }
+  } catch (e) { console.error('carregarDisciplinasParaSelects:', e); }
+}
+
 function abrirModalDisciplina(d) {
   openM('m-disciplina');
   const titulo = document.getElementById('m-disciplina-titulo');
@@ -86,6 +131,7 @@ async function salvarDisciplina() {
     showToast(id ? '✅ Atualizada' : '✅ Criada', 'success');
     fecharModalDisciplina();
     carregarDisciplinas();
+    carregarDisciplinasParaSelects();
   } catch (e) { showToast('Erro: ' + e.message, 'error'); }
 }
 
@@ -106,6 +152,7 @@ async function excluirDisciplina(id) {
     const data = await r.json().catch(() => ({}));
     if (!r.ok) { alert(data.erro || 'Erro'); return; }
     carregarDisciplinas();
+    carregarDisciplinasParaSelects();
   } catch (e) { alert('Erro: ' + e.message); }
 }
 
