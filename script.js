@@ -3229,3 +3229,34 @@ if (typeof go === 'function') {
     if (page === 'disciplinas') setTimeout(carregarDisciplinas, 80);
   };
 }
+/* ── Movido do index.html ── */
+#page-config {
+  overflow-y: auto !important;
+  max-height: calc(100vh - 10px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+  padding-bottom: 40px;
+  scrollbar-width: thin;
+}
+#page-config::-webkit-scrollbar { width: 8px; }
+#page-config::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 4px; }
+
+.modal {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+}
+.modal::-webkit-scrollbar { width: 6px; }
+.modal::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 4px; }
+
+.page {
+  overflow-y: auto;
+  max-height: calc(100vh - 20px);
+}
+
+#page-config > div.no-print {
+  overflow-y: auto;
+}
+
