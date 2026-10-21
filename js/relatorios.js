@@ -149,21 +149,19 @@ async function carregarRelatorioTurmaFiltrado() {
             'Geografia': { k: 'ch', label: 'CH' },
             'Inglês': { k: 'portugues', label: 'Português' }
         };
+
+        // ═══════════════════════════════════════════════════════════
+        // ✅ FIX: SEM auto-seleção de prova. Só renderiza se o usuário
+        //         escolheu uma prova explicitamente.
+        // ═══════════════════════════════════════════════════════════
         let discSel = '';
-        if (op && op.value && op.dataset.disciplina) discSel = op.dataset.disciplina;
-        else {
-            for (let i = 1; i < sp.options.length; i++) {
-                const opt = sp.options[i];
-                if (opt.value && opt.dataset.disciplina) {
-                    discSel = opt.dataset.disciplina;
-                    sp.selectedIndex = i;
-                    break;
-                }
-            }
+        if (op && op.value && op.dataset.disciplina) {
+            discSel = op.dataset.disciplina;
         }
+
         if (!discSel) {
             const tb = document.getElementById('tb-rel-alunos');
-            if (tb) tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
+            if (tb) tb.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
             setText('rel-total-alunos-tabela', '0 alunos');
             setText('rel-total-correcoes', '0 correções');
             setText('rel-disc-acertos', '0');
@@ -303,8 +301,6 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 cont.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3);">Nenhum dado</div>';
                 return;
             }
-
-            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO - CENTRALIZADO ═══════════
             const gabaritoInline = keys.map(num => {
                 const d = map.get(num);
                 return `<span style="background:rgba(139,92,246,.15);color:#a78bfa;padding:3px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);">Q${num}: <strong>${d.gabarito || '?'}</strong></span>`;
@@ -318,8 +314,6 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%;">${gabaritoInline}</div>
             `;
             cont.appendChild(cab);
-
-            // ═══════════ CARDS POR QUESTÃO ═══════════
             keys.forEach(num => {
                 const d = map.get(num); const t = d.acertos + d.erros;
                 const pa = t > 0 ? Math.round((d.acertos / t) * 100) : 0;
