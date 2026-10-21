@@ -114,7 +114,11 @@ def salvar_correcao_texto():
         data = request.json or {}
         aluno_id = data.get('aluno_id'); prova_id = data.get('prova_id')
         texto = data.get('texto'); nota = data.get('nota')
-        metricas = data.get('metricas', {}); feedback = data.get('feedback', '')
+
+        # ── None-safe ────────────────────────────────────────
+        metricas = data.get('metricas') or {}
+        feedback = data.get('feedback') or ''
+
         if not aluno_id: return jsonify({'erro': 'Aluno obrigatório'}), 400
         if not texto: return jsonify({'erro': 'Texto obrigatório'}), 400
         try: escola_sessao = get_escola_id()
@@ -140,7 +144,7 @@ def salvar_correcao_texto():
                 pr = cur.fetchone()
                 cur.execute("SELECT t.serie FROM alunos a LEFT JOIN turmas t ON a.turma_id=t.id WHERE a.id = %s", (aluno_id,))
                 sr = cur.fetchone()
-                disc_h = (pr['disciplina'] if pr else None) or 'Redação'
+                disc_h = (pr['disciplina'] if pr else None) or 'Produção de Texto'
                 tit_h = (pr['titulo'] if pr else '') or ''
                 ser_h = (sr['serie'] if sr else None) or (pr['serie'] if pr else '') or '1º Ano'
                 tipo_av = identificar_disciplina(tit_h, disc_h, ser_h)
