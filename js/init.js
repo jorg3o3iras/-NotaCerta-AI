@@ -56,7 +56,15 @@ async function carregarDados() {
 async function carregarDadosSecundarios() {
     try {
         await Promise.all([carregarGabaritos(), carregarUltimasCorrecoes(), carregarUsuarios(), carregarCombos()]);
-        await Promise.all([carregarEscolasFiltroAlunos(), carregarEscolasCorrigir(), carregarEscolasTexto(), carregarEscolasParaCorrecaoManual(), carregarFiltrosRelTurma(), carregarFiltroEscolaTurmas()]);
+        await Promise.all([
+            carregarEscolasFiltroAlunos(),
+            carregarEscolasCorrigir(),
+            carregarEscolasTexto(),
+            carregarEscolasParaCorrecaoManual(),
+            carregarFiltrosRelTurma(),
+            carregarFiltroEscolaTurmas()
+        ]);
+        if (typeof carregarDisciplinasParaSelects === 'function') await carregarDisciplinasParaSelects();
     } catch (e) { console.warn(e); }
 }
 
@@ -88,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     carregarFiltrosRelTurma();
     carregarFiltroEscolaTurmas();
     carregarEscolasParaAluno();
+    if (typeof carregarDisciplinasParaSelects === 'function') carregarDisciplinasParaSelects();
     if (typeof carregarProvasParaGabarito === 'function') carregarProvasParaGabarito();
     if (typeof carregarProvasParaTexto === 'function') carregarProvasParaTexto();
     if (typeof carregarProvasParaFiltro === 'function') carregarProvasParaFiltro();
