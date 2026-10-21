@@ -1,4 +1,5 @@
 import json
+import logging
 import traceback
 
 from flask import Blueprint, jsonify, request
@@ -18,10 +19,13 @@ def salvar_gabarito():
     try:
         data = request.json or {}
         prova_id = data.get('prova_id')
-        respostas = data.get('respostas', [])
-        bncc = data.get('bncc', [])
-        textos_questoes = data.get('textos_questoes', [])
-        niveis = data.get('niveis', [])
+
+        # ── None-safe ────────────────────────────────────────
+        respostas = data.get('respostas') or []
+        bncc = data.get('bncc') or []
+        textos_questoes = data.get('textos_questoes') or []
+        niveis = data.get('niveis') or []
+
         if not prova_id: return jsonify({'erro': 'Prova ID é obrigatório'}), 400
         conn = get_db_connection()
         if not conn: return jsonify({'erro': 'Banco indisponível'}), 503
@@ -57,7 +61,7 @@ def salvar_gabarito():
         if conn:
             try: conn.rollback()
             except: pass
-        traceback.print_exc()
+        logging.error(f"❌ salvar_gabarito: {e}"); traceback.print_exc()
         return jsonify({'erro': str(e)}), 500
     finally:
         if conn:
