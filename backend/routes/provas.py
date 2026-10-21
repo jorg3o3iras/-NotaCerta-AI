@@ -81,9 +81,12 @@ def criar_prova():
         cur.execute("SELECT id FROM provas WHERE titulo=%s AND serie=%s AND escola_id=%s",
                     (titulo, serie, escola_id))
         if cur.fetchone(): return jsonify({'erro': 'Já existe prova com este título nesta escola'}), 400
-        bncc_v = [str(b).strip() for b in data.get('bncc', []) if b and str(b).strip()]
-        textos_v = [str(t).strip() for t in data.get('textos_questoes', []) if t]
-        niveis_v = [str(n).strip() for n in data.get('niveis', []) if n]
+
+        # ── Fix defensivo: None-safe ──────────────────────────
+        bncc_v = [str(b).strip() for b in (data.get('bncc') or []) if b and str(b).strip()]
+        textos_v = [str(t).strip() for t in (data.get('textos_questoes') or []) if t]
+        niveis_v = [str(n).strip() for n in (data.get('niveis') or []) if n]
+
         cur.execute("""INSERT INTO provas (escola_id, titulo, serie, disciplina,
             bimestre, data_prova, valor_nota, tipo_questoes, quantidade_questoes,
             gabarito, bncc, textos_questoes, niveis)
@@ -155,9 +158,12 @@ def editar_prova(id):
         if not ex: return jsonify({'erro': 'Prova não encontrada'}), 404
         if escola_sessao is not None and ex['escola_id'] != escola_sessao:
             return jsonify({'erro': 'Acesso negado'}), 403
-        bncc_v = [str(b).strip() for b in data.get('bncc', []) if b and str(b).strip()]
-        textos_v = [str(t).strip() for t in data.get('textos_questoes', []) if t]
-        niveis_v = [str(n).strip() for n in data.get('niveis', []) if n]
+
+        # ── Fix defensivo: None-safe ──────────────────────────
+        bncc_v = [str(b).strip() for b in (data.get('bncc') or []) if b and str(b).strip()]
+        textos_v = [str(t).strip() for t in (data.get('textos_questoes') or []) if t]
+        niveis_v = [str(n).strip() for n in (data.get('niveis') or []) if n]
+
         cur.execute("""UPDATE provas SET escola_id=%s, titulo=%s, serie=%s,
             disciplina=%s, bimestre=%s, data_prova=%s, valor_nota=%s,
             tipo_questoes=%s, quantidade_questoes=%s, gabarito=%s, bncc=%s,
