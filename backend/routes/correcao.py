@@ -49,7 +49,9 @@ def corrigir_com_ia():
         if not dados: return jsonify({'erro': 'Prova não encontrada'}), 404
         if escola_sessao is not None and dados.get('aluno_escola_id') != escola_sessao:
             return jsonify({'erro': 'Acesso negado a este aluno'}), 403
-        gabarito = dados.get('gabarito', [])
+
+        # ── None-safe ────────────────────────────────────────
+        gabarito = dados.get('gabarito') or []
         if not gabarito: return jsonify({'erro': 'Gabarito não cadastrado'}), 400
         tipo_q = dados.get('tipo_questoes') or 4
         if isinstance(tipo_q, str):
@@ -61,7 +63,7 @@ def corrigir_com_ia():
         padrao = gerar_padrao_gabarito(gabarito, tipo_q)
         nome_aluno = dados.get('aluno_nome') or 'Aluno'
         serie = dados.get('turma_serie') or dados.get('serie') or '1º Ano'
-        bncc_gab = dados.get('bncc', [])
+        bncc_gab = dados.get('bncc') or []           # ← FIX
         disciplina = dados.get('disciplina', '')
         prova_titulo = dados.get('titulo', '')
         conn.close(); conn = None
@@ -160,7 +162,9 @@ def corrigir_automatico():
             return jsonify({'sucesso': False, 'erro': f'Prova {prova_id} ou aluno {aluno_id} não encontrados'}), 404
         if escola_sessao is not None and dados.get('aluno_escola_id') != escola_sessao:
             return jsonify({'sucesso': False, 'erro': 'Acesso negado a este aluno'}), 403
-        gab = dados.get('gabarito', [])
+
+        # ── None-safe ────────────────────────────────────────
+        gab = dados.get('gabarito') or []
         if not gab: return jsonify({'sucesso': False, 'erro': 'Sem gabarito'}), 400
         tipo_q = dados.get('tipo_questoes') or 4
         if isinstance(tipo_q, str):
@@ -172,7 +176,7 @@ def corrigir_automatico():
         padrao = gerar_padrao_gabarito(gab, tipo_q)
         nome = dados.get('aluno_nome') or 'Aluno'
         serie = dados.get('turma_serie') or dados.get('serie') or '1º Ano'
-        bncc_gab = dados.get('bncc', [])
+        bncc_gab = dados.get('bncc') or []           # ← FIX
         disciplina = dados.get('disciplina', '')
         titulo = dados.get('titulo', '')
         escola_nome_bd = dados.get('escola_nome', '')
