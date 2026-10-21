@@ -316,7 +316,6 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 div.innerHTML = `
                     <div style="font-size:14px;font-weight:800;margin-bottom:5px;">Q${num}</div>
                     <div style="display:flex;justify-content:center;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
-                        <span style="font-size:10px;font-weight:800;color:#a78bfa;background:rgba(139,92,246,.15);padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);" title="Gabarito oficial">GAB: ${d.gabarito || '?'}</span>
                         ${respTop ? `<span style="font-size:10px;font-weight:800;color:${corResp};background:${corResp}22;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid ${corResp}55;" title="Resposta do aluno">RESP: ${respTop} ${respAcertou ? '✓' : '✗'}</span>` : ''}
                     </div>
                     <div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:7px;">${breakdown}</div>
