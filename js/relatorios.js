@@ -1,7 +1,3 @@
-// relatorios.js s
-
-// ─── FILTROS EM CASCATA ──────────────────────────────
-
 async function carregarFiltrosRelTurma() {
     try {
         const escolas = await carregarEscolasComCache();
@@ -60,7 +56,6 @@ async function carregarTurmasRelTurma(escolaId) {
 async function carregarProvasRelTurma(escolaId, serie) {
     const sp = document.getElementById('rel-turma-prova');
     if (!sp) return;
-    const valorAnterior = sp.value;
     sp.innerHTML = '<option value="">Selecione a prova</option>';
     try {
         const provas = await carregarProvasComCache();
@@ -81,10 +76,6 @@ async function carregarProvasRelTurma(escolaId, serie) {
                 o.dataset.serie = p.serie || '';
                 sp.appendChild(o);
             });
-            if (valorAnterior) {
-                const existe = Array.from(sp.options).some(o => o.value === valorAnterior);
-                if (existe) sp.value = valorAnterior;
-            }
         }
     } catch (e) { console.error('carregarProvasRelTurma:', e); }
 }
@@ -149,11 +140,6 @@ async function carregarRelatorioTurmaFiltrado() {
             'Geografia': { k: 'ch', label: 'CH' },
             'Inglês': { k: 'portugues', label: 'Português' }
         };
-
-        // ═══════════════════════════════════════════════════════════
-        // ✅ NÃO auto-seleciona prova. Só renderiza se `pi` (prova id)
-        //    estiver preenchido. Sem o bloco `else` que existia antes.
-        // ═══════════════════════════════════════════════════════════
         if (!pi || !op || !op.dataset.disciplina) {
             const tb = document.getElementById('tb-rel-alunos');
             if (tb) tb.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
@@ -168,12 +154,10 @@ async function carregarRelatorioTurmaFiltrado() {
             if (c) c.style.display = 'none';
             return;
         }
-
         const discSel = op.dataset.disciplina;
         const info = dm[discSel] || { k: 'portugues', label: 'Português' };
         const discKey = info.k;
         const isProd = !!info.prod;
-
         let alunosTurma = [];
         if (ti) {
             try {
@@ -181,7 +165,6 @@ async function carregarRelatorioTurmaFiltrado() {
                 if (d && !d.erro && Array.isArray(d)) alunosTurma = d;
             } catch (e) {}
         }
-
         let url = API_URL + '/api/historico/agrupado';
         const p = new URLSearchParams();
         if (ei) p.append('escola', ei);
