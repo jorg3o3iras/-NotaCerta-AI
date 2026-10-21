@@ -64,7 +64,7 @@ async function visualizarProva(id) {
                 <div><strong>📚 Disciplina</strong><br>${escapeHtml(prova.disciplina || '—')}</div>
                 <div><strong>🎓 Série</strong><br>${escapeHtml(prova.serie || '—')}</div>
                 <div><strong>📅 Data</strong><br>${escapeHtml(prova.data_prova || '—')}</div>
-                <div><strong>📊 Bimestre</strong><br>${escapeHtml(prova.bimestre || '—')}</div>
+                <div><strong>📊 Semestre</strong><br>${escapeHtml(prova.bimestre || '—')}</div>
                 <div><strong>🔢 Questões</strong><br>${prova.quantidade_questoes || 20}</div>
             </div>${gabHtml}`;
         openM('m-visualizar-prova');
@@ -92,7 +92,7 @@ async function editarProva(id) {
 
         document.getElementById('prova-titulo').value = prova.titulo || '';
         document.getElementById('prova-serie').value = prova.serie || '1º Ano';
-        document.getElementById('prova-bimestre').value = prova.bimestre || '1º e 2º bimestre';
+        document.getElementById('prova-bimestre').value = prova.bimestre || '1º SEMESTRE';
         document.getElementById('prova-data').value = prova.data_prova || '';
         document.getElementById('prova-nota').value = prova.valor_nota || 10;
 
@@ -150,7 +150,7 @@ async function editarProva(id) {
 
 function cancelarEdicaoProva() {
     _editandoProvaId = null;
-    const reset = { 'prova-titulo': '', 'prova-data': '', 'prova-serie': '1º Ano', 'prova-bimestre': '1º e 2º bimestre', 'prova-questoes': '20', 'prova-nota': '10', 'prova-escola': '' };
+    const reset = { 'prova-titulo': '', 'prova-data': '', 'prova-serie': '1º Ano', 'prova-bimestre': '1º SEMESTRE', 'prova-questoes': '20', 'prova-nota': '10', 'prova-escola': '' };
     Object.entries(reset).forEach(([id, v]) => { const e = document.getElementById(id); if (e) e.value = v; });
     // Disciplina fica vazia (o usuário escolhe na hora)
     const selD = document.getElementById('prova-disciplina');
@@ -173,7 +173,7 @@ async function salvarProva() {
     const dados = {
         titulo, serie, escola_id: parseInt(escolaId),
         disciplina: document.getElementById('prova-disciplina').value || 'Matemática',
-        bimestre: document.getElementById('prova-bimestre').value || '1º e 2º bimestre',
+        bimestre: document.getElementById('prova-bimestre').value || '1º SEMESTRE',
         data_prova: document.getElementById('prova-data').value || null,
         quantidade_questoes: parseInt(document.getElementById('prova-questoes').value) || 20,
         nota_maxima: parseFloat(document.getElementById('prova-nota').value) || 10,
