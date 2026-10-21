@@ -342,7 +342,7 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
             const qs = d.questoes_status || []; totalAl++;
             if (Array.isArray(qs) && qs.length > 0) qs.forEach((q, ix) => {
                 const num = q.numero || ix + 1;
-                if (!map.has(num)) map.set(num, { acertos: 0, erros: 0, gabarito: '', bncc: '' });
+                if (!map.has(num)) map.set(num, { acertos: 0, erros: 0, gabarito: '', bncc: '', contagem: {} });
                 const dd = map.get(num);
                 const r = q.resposta || '', g = q.gabarito || '';
                 // Guarda gabarito oficial (primeiro válido encontrado)
@@ -351,7 +351,12 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 }
                 // Guarda BNCC (primeiro válido)
                 if (!dd.bncc && q.bncc) dd.bncc = String(q.bncc).trim();
+                // Contabiliza a resposta do aluno
                 const rv = r && r !== '—' && r !== '-';
+                if (rv) {
+                    const letra = String(r).toUpperCase().trim();
+                    dd.contagem[letra] = (dd.contagem[letra] || 0) + 1;
+                }
                 const ic = rv && r.toUpperCase() === g.toUpperCase();
                 if (ic || q.acertou === true) { dd.acertos++; totalAc++; } else { dd.erros++; totalEr++; }
             });
@@ -369,18 +374,18 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 return;
             }
 
-            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO - CENTRALIZADO ═══════════
+            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO ═══════════
             const gabaritoInline = keys.map(num => {
                 const d = map.get(num);
                 return `<span style="background:rgba(139,92,246,.15);color:#a78bfa;padding:3px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);">Q${num}: <strong>${d.gabarito || '?'}</strong></span>`;
             }).join(' ');
             const cab = document.createElement('div');
-            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;';
+            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);';
             cab.innerHTML = `
-                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center;">
+                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
                     📋 Gabarito Oficial da Prova
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%;">${gabaritoInline}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:5px;">${gabaritoInline}</div>
             `;
             cont.appendChild(cab);
 
@@ -392,9 +397,31 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 div.className = 'acertos-por-questao-item';
                 div.style.cssText = 'background:var(--surface);border-radius:10px;padding:12px 8px;border:1px solid var(--border);text-align:center;position:relative;';
                 const cb = pa >= 80 ? '#10b981' : pa >= 60 ? '#f59e0b' : '#ef4444';
+
+                // Resposta mais comum do(s) aluno(s)
+                const respOrdenado = Object.entries(d.contagem).sort((a, b) => b[1] - a[1]);
+                const respTop = respOrdenado.length > 0 ? respOrdenado[0][0] : '';
+                const respAcertou = respTop && d.gabarito && respTop === d.gabarito;
+                const corResp = !respTop ? '#94a3b8' : (respAcertou ? '#10b981' : '#ef4444');
+
+                // Breakdown completo de todas as respostas
+                const letras = Object.keys(d.contagem).sort();
+                const breakdown = letras.length > 0 ? letras.map(l => {
+                    const qtd = d.contagem[l];
+                    const isGab = l === d.gabarito;
+                    return `<span style="font-size:9px;font-weight:700;color:${isGab ? '#10b981' : '#ef4444'};background:${isGab ? 'rgba(16,185,129,.12)' : 'rgba(239,68,68,.10)'};padding:1px 5px;border-radius:3px;font-family:'Courier New',monospace;border:1px solid ${isGab ? 'rgba(16,185,129,.3)' : 'rgba(239,68,68,.2)'};">${l}:${qtd}</span>`;
+                }).join(' ') : '<span style="font-size:9px;color:var(--text3);">sem respostas</span>';
+
                 div.innerHTML = `
-                    <div style="font-size:14px;font-weight:800;margin-bottom:4px;">Q${num}</div>
-                    <div style="font-size:11px;font-weight:800;color:#a78bfa;background:rgba(139,92,246,.15);padding:2px 10px;border-radius:6px;display:inline-block;margin-bottom:6px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.25);">GAB: ${d.gabarito || '?'}</div>
+                    <div style="font-size:14px;font-weight:800;margin-bottom:5px;">Q${num}</div>
+
+                    <div style="display:flex;justify-content:center;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+                        <span style="font-size:10px;font-weight:800;color:#a78bfa;background:rgba(139,92,246,.15);padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);" title="Gabarito oficial">GAB: ${d.gabarito || '?'}</span>
+                        ${respTop ? `<span style="font-size:10px;font-weight:800;color:${corResp};background:${corResp}22;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid ${corResp}55;" title="Resposta do aluno">RESP: ${respTop} ${respAcertou ? '✓' : '✗'}</span>` : ''}
+                    </div>
+
+                    <div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:7px;">${breakdown}</div>
+
                     <div style="display:flex;justify-content:center;gap:4px;font-size:16px;font-weight:700;">
                         <span style="color:var(--green);">${d.acertos}</span>
                         <span style="color:var(--text3);">/</span>
