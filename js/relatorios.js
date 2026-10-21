@@ -369,18 +369,18 @@ function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
                 return;
             }
 
-            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO ═══════════
+            // ═══════════ CABEÇALHO COM GABARITO OFICIAL COMPLETO - CENTRALIZADO ═══════════
             const gabaritoInline = keys.map(num => {
                 const d = map.get(num);
                 return `<span style="background:rgba(139,92,246,.15);color:#a78bfa;padding:3px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);">Q${num}: <strong>${d.gabarito || '?'}</strong></span>`;
             }).join(' ');
             const cab = document.createElement('div');
-            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);';
+            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;';
             cab.innerHTML = `
-                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center;">
                     📋 Gabarito Oficial da Prova
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:5px;">${gabaritoInline}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%;">${gabaritoInline}</div>
             `;
             cont.appendChild(cab);
 
@@ -419,12 +419,12 @@ function imprimirRelatorioTurma() {
     const table = document.querySelector('#tb-rel-alunos')?.closest('table');
     if (!table) { showToast('❌ Sem dados!', 'error'); return; }
     const rows = table.querySelectorAll('tbody tr');
-    if (rows.length === 0) { showToast('⚠️ Sem dados', 'error'); return; }
+    if (rows.length === 0) { showToast('⚠ Sem dados', 'error'); return; }
     let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório</title><style>body{font-family:Arial;margin:20px;font-size:11px;}h1{text-align:center;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:5px;text-align:center;}th{background:#f2f2f2;}</style></head><body>';
     html += '<h1>📊 Relatório por Turma</h1>';
     html += table.outerHTML;
     html += '</body></html>';
     const w = window.open('', '_blank');
-    if (!w) { showToast('⚠️ Pop-up!', 'error'); return; }
+    if (!w) { showToast('⚠ Pop-up!', 'error'); return; }
     w.document.write(html); w.document.close(); w.focus(); w.print();
 }
