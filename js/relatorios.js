@@ -138,7 +138,7 @@ async function carregarRelatorioTurmaFiltrado() {
             'Ciências Naturais': { k: 'cn', label: 'CN' },
             'História': { k: 'ch', label: 'CH' },
             'Geografia': { k: 'ch', label: 'CH' },
-            'Inglês': { k: 'portugues', label: 'Português' }
+            'Inglês': { k: 'ingles', label: 'Inglês' }
         };
         if (!pi || !op || !op.dataset.disciplina) {
             const tb = document.getElementById('tb-rel-alunos');
