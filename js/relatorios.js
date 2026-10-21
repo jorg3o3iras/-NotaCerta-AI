@@ -151,15 +151,10 @@ async function carregarRelatorioTurmaFiltrado() {
         };
 
         // ═══════════════════════════════════════════════════════════
-        // ✅ FIX: SEM auto-seleção de prova. Só renderiza se o usuário
-        //         escolheu uma prova explicitamente.
+        // ✅ NÃO auto-seleciona prova. Só renderiza se `pi` (prova id)
+        //    estiver preenchido. Sem o bloco `else` que existia antes.
         // ═══════════════════════════════════════════════════════════
-        let discSel = '';
-        if (op && op.value && op.dataset.disciplina) {
-            discSel = op.dataset.disciplina;
-        }
-
-        if (!discSel) {
+        if (!pi || !op || !op.dataset.disciplina) {
             const tb = document.getElementById('tb-rel-alunos');
             if (tb) tb.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--text3);">📌 Selecione uma prova para visualizar o relatório</td></tr>';
             setText('rel-total-alunos-tabela', '0 alunos');
@@ -173,9 +168,12 @@ async function carregarRelatorioTurmaFiltrado() {
             if (c) c.style.display = 'none';
             return;
         }
+
+        const discSel = op.dataset.disciplina;
         const info = dm[discSel] || { k: 'portugues', label: 'Português' };
         const discKey = info.k;
         const isProd = !!info.prod;
+
         let alunosTurma = [];
         if (ti) {
             try {
@@ -183,6 +181,7 @@ async function carregarRelatorioTurmaFiltrado() {
                 if (d && !d.erro && Array.isArray(d)) alunosTurma = d;
             } catch (e) {}
         }
+
         let url = API_URL + '/api/historico/agrupado';
         const p = new URLSearchParams();
         if (ei) p.append('escola', ei);
