@@ -18,7 +18,7 @@ async function carregarProvas() {
                 <td><span class="badge ${p.gabarito && p.gabarito.length > 0 ? 'badge-green' : 'badge-orange'}">${p.gabarito && p.gabarito.length > 0 ? 'Com Gabarito' : 'Sem Gabarito'}</span></td>
                 <td><div class="btn-group">
                     <button class="btn btn-outline btn-sm" onclick="visualizarProva(${p.id})">👁️</button>
-                    ${p.gabarito && p.gabarito.length > 0 ? '' : '<button class="btn btn-primary btn-sm" onclick="go(\'gabarito\')">+ Gabarito</button>'}
+                    <button class="btn btn-primary btn-sm" onclick="editarProva(${p.id})" title="Editar prova">✏️</button>
                     <button class="btn-del" onclick="excluirProva(${p.id}, '${escapeAttr(p.titulo)}')">🗑️</button>
                 </div></td>
             </tr>`;
@@ -28,6 +28,7 @@ async function carregarProvas() {
 
 let visualizarProvaId = null;
 let visualizarProvaData = null;
+let _editandoProvaId = null;
 
 async function visualizarProva(id) {
     try {
@@ -71,8 +72,87 @@ async function visualizarProva(id) {
 }
 
 function editarProvaDireto() {
-    if (visualizarProvaId) { closeM('m-visualizar-prova'); editarGabarito(visualizarProvaId); }
-    else showToast('❌ Nenhuma prova selecionada.', 'error');
+    if (!visualizarProvaId) { showToast('❌ Nenhuma prova selecionada.', 'error'); return; }
+    closeM('m-visualizar-prova');
+    editarProva(visualizarProvaId);
+}
+
+async function editarProva(id) {
+    try {
+        const r = await apiFetch(API_URL + '/api/provas/' + id);
+        const prova = await r.json();
+        if (!prova || prova.erro) { showToast('❌ ' + (prova.erro || 'Erro'), 'error'); return; }
+        _editandoProvaId = id;
+        go('prova-upload');
+
+        document.getElementById('prova-titulo').value = prova.titulo || '';
+        document.getElementById('prova-serie').value = prova.serie || '1º Ano';
+        document.getElementById('prova-bimestre').value = prova.bimestre || '1º e 2º bimestre';
+        document.getElementById('prova-data').value = prova.data_prova || '';
+        document.getElementById('prova-nota').value = prova.valor_nota || 10;
+
+        // Carrega escolas e seleciona a da prova
+        const escolas = await carregarEscolasComCache();
+        const sel = document.getElementById('prova-escola');
+        if (sel) {
+            sel.innerHTML = '<option value="">Selecione a escola...</option>';
+            (escolas || []).forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.nome;
+                if (e.id == prova.escola_id) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        // Popula questões e seleciona a quantidade atual
+        if (typeof popularSelectQuestoes === 'function') popularSelectQuestoes();
+        const selQ = document.getElementById('prova-questoes');
+        if (selQ && prova.quantidade_questoes) selQ.value = String(prova.quantidade_questoes);
+
+        // Disciplina (adiciona se não estiver na lista)
+        const selD = document.getElementById('prova-disciplina');
+        if (selD && prova.disciplina) {
+            let achou = false;
+            Array.from(selD.options).forEach(o => { if (o.value === prova.disciplina) { o.selected = true; achou = true; } });
+            if (!achou) {
+                const opt = document.createElement('option');
+                opt.value = prova.disciplina;
+                opt.textContent = prova.disciplina;
+                selD.appendChild(opt);
+                selD.value = prova.disciplina;
+            }
+        }
+
+        // Altera título da página e adiciona botão Cancelar
+        const tituloPagina = document.querySelector('#page-prova-upload .page-title');
+        if (tituloPagina) tituloPagina.textContent = '✏️ Editar Prova';
+        const btnSalvar = document.querySelector('#page-prova-upload .btn-green');
+        const btnGroup = btnSalvar?.parentElement;
+        if (btnGroup && !document.getElementById('btn-cancelar-edicao')) {
+            const b = document.createElement('button');
+            b.id = 'btn-cancelar-edicao';
+            b.type = 'button';
+            b.className = 'btn btn-outline btn-full';
+            b.textContent = '✕ Cancelar Edição';
+            b.onclick = () => cancelarEdicaoProva();
+            btnGroup.appendChild(b);
+        }
+        if (typeof atualizarInfoAlts === 'function') atualizarInfoAlts();
+        showToast('📝 Editando prova...', 'info');
+    } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+function cancelarEdicaoProva() {
+    _editandoProvaId = null;
+    const reset = { 'prova-titulo': '', 'prova-data': '', 'prova-serie': '1º Ano', 'prova-disciplina': 'Matemática', 'prova-bimestre': '1º e 2º bimestre', 'prova-questoes': '20', 'prova-nota': '10', 'prova-escola': '' };
+    Object.entries(reset).forEach(([id, v]) => { const e = document.getElementById(id); if (e) e.value = v; });
+    const tituloPagina = document.querySelector('#page-prova-upload .page-title');
+    if (tituloPagina) tituloPagina.textContent = '📤 Cadastrar Prova';
+    const b = document.getElementById('btn-cancelar-edicao');
+    if (b) b.remove();
+    if (typeof atualizarInfoAlts === 'function') atualizarInfoAlts();
+    showToast('✕ Edição cancelada', 'info');
 }
 
 async function salvarProva() {
@@ -92,16 +172,23 @@ async function salvarProva() {
         tipo_questoes: '4'
     };
     try {
-        const response = await apiFetch(API_URL + '/api/provas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
+        const isEdicao = !!_editandoProvaId;
+        const url = isEdicao ? API_URL + '/api/provas/' + _editandoProvaId : API_URL + '/api/provas';
+        const method = isEdicao ? 'PUT' : 'POST';
+        const response = await apiFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
         const result = await processarRespostaAPI(response);
-        if (result.ok && result.data.id) {
-            showToast('✅ Prova salva!', 'success');
-            limparCache();
+        if (result.ok && (result.data.id || result.data.sucesso)) {
+            showToast(isEdicao ? '✅ Prova atualizada!' : '✅ Prova salva!', 'success');
+            _editandoProvaId = null;
             document.getElementById('prova-titulo').value = '';
+            const tituloPagina = document.querySelector('#page-prova-upload .page-title');
+            if (tituloPagina) tituloPagina.textContent = '📤 Cadastrar Prova';
+            const btnCancel = document.getElementById('btn-cancelar-edicao');
+            if (btnCancel) btnCancel.remove();
             const upOk = document.getElementById('up-ok');
             if (upOk) { upOk.style.display = 'block'; setTimeout(() => upOk.style.display = 'none', 3000); }
-            carregarProvas();
-            tableFeedback.destacarLinha('tb-provas', result.data.id);
+            limparCache(); carregarProvas();
+            if (result.data.id) tableFeedback.destacarLinha('tb-provas', result.data.id);
             carregarDashboard(); if (typeof carregarCombos === 'function') carregarCombos();
         } else showToast('❌ ' + (result.data.erro || 'Erro'), 'error');
     } catch (erro) { showToast('❌ ' + erro.message, 'error'); }
