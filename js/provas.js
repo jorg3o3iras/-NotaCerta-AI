@@ -85,6 +85,11 @@ async function editarProva(id) {
         _editandoProvaId = id;
         go('prova-upload');
 
+        // ═══ Recarrega disciplinas ANTES de setar valores ═══
+        if (typeof carregarDisciplinasParaSelects === 'function') {
+            await carregarDisciplinasParaSelects();
+        }
+
         document.getElementById('prova-titulo').value = prova.titulo || '';
         document.getElementById('prova-serie').value = prova.serie || '1º Ano';
         document.getElementById('prova-bimestre').value = prova.bimestre || '1º e 2º bimestre';
@@ -145,8 +150,11 @@ async function editarProva(id) {
 
 function cancelarEdicaoProva() {
     _editandoProvaId = null;
-    const reset = { 'prova-titulo': '', 'prova-data': '', 'prova-serie': '1º Ano', 'prova-disciplina': 'Matemática', 'prova-bimestre': '1º e 2º bimestre', 'prova-questoes': '20', 'prova-nota': '10', 'prova-escola': '' };
+    const reset = { 'prova-titulo': '', 'prova-data': '', 'prova-serie': '1º Ano', 'prova-bimestre': '1º e 2º bimestre', 'prova-questoes': '20', 'prova-nota': '10', 'prova-escola': '' };
     Object.entries(reset).forEach(([id, v]) => { const e = document.getElementById(id); if (e) e.value = v; });
+    // Disciplina fica vazia (o usuário escolhe na hora)
+    const selD = document.getElementById('prova-disciplina');
+    if (selD) selD.value = '';
     const tituloPagina = document.querySelector('#page-prova-upload .page-title');
     if (tituloPagina) tituloPagina.textContent = '📤 Cadastrar Prova';
     const b = document.getElementById('btn-cancelar-edicao');
