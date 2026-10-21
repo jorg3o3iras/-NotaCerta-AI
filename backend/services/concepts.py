@@ -27,12 +27,14 @@ def identificar_disciplina(prova_titulo, disciplina, serie):
     if re.search(r'\bproducao\b', d) or 'texto' in d or 'redacao' in d: return 'Producao'
     if re.search(r'\bch\b', d) or 'ciencias humanas' in d: return 'CH'
     if re.search(r'\bcn\b', d) or 'ciencias naturais' in d or 'ciencias da natureza' in d: return 'CN'
+    if re.search(r'\bingles\b', d): return 'Ingles'          # ← ADICIONAR ESTA LINHA
     t = _sem_acento(prova_titulo)
     if re.search(r'\bportugues\b', t) or 'lingua' in t: return 'Portugues'
     if re.search(r'\bmatematica\b', t) or re.search(r'\bmat\b', t): return 'Matematica'
     if re.search(r'\bproducao\b', t) or 'texto' in t or 'redacao' in t: return 'Producao'
     if re.search(r'\bch\b', t) or 'ciencias humanas' in t: return 'CH'
     if re.search(r'\bcn\b', t) or 'ciencias naturais' in t or 'ciencias da natureza' in t: return 'CN'
+    if re.search(r'\bingles\b', t): return 'Ingles'          # ← ADICIONAR ESTA LINHA
     if serie:
         m = re.search(r'(\d+)', serie)
         if m:
