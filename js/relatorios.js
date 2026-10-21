@@ -150,8 +150,6 @@ async function carregarRelatorioTurmaFiltrado() {
             setText('rel-disc-media', '0.0');
             setText('rel-disciplina-nome', '—');
             setText('rel-disc-conceito', '—');
-            const c = document.getElementById('rel-acertos-por-questao');
-            if (c) c.style.display = 'none';
             return;
         }
         const discSel = op.dataset.disciplina;
@@ -226,117 +224,10 @@ async function carregarRelatorioTurmaFiltrado() {
             else cel = `<td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td><td style="text-align:center;color:var(--text3);">—</td>`;
             return `<tr><td style="text-align:center;">${med}</td><td style="text-align:center;">${a.numero_chamada || (ix + 1)}</td><td style="padding-left:10px;"><strong>${escapeHtml(a.aluno_nome || '—')}</strong></td><td style="text-align:center;"><span class="badge badge-purple" style="font-size:9px;">${escapeHtml(a.serie || '—')}</span></td>${cel}</tr>`;
         }).join('');
-        if (isProd) {
-            const c = document.getElementById('rel-acertos-por-questao');
-            if (c) c.style.display = 'none';
-        } else {
-            const c = document.getElementById('rel-acertos-por-questao');
-            if (c) c.style.display = 'block';
-            atualizarGraficoAcertosPorQuestao(agrup, info.label, discKey);
-        }
     } catch (e) {
         console.error('❌ carregarRelatorioTurmaFiltrado:', e);
         showToast('❌ Erro: ' + e.message, 'error');
     }
-}
-
-function atualizarGraficoAcertosPorQuestao(agrup, disc, key) {
-    try {
-        const cont = document.getElementById('rel-acertos-grid');
-        const totEl = document.getElementById('rel-total-questoes');
-        const dt = document.getElementById('rel-acertos-disciplina');
-        const taEl = document.getElementById('rel-total-acertos-disciplina');
-        const teEl = document.getElementById('rel-total-erros-disciplina');
-        const meEl = document.getElementById('rel-media-disciplina');
-        if (dt) dt.textContent = disc;
-        if (!agrup || agrup.erro || !Array.isArray(agrup) || agrup.length === 0) {
-            cont.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3);">Nenhum dado</div>';
-            return;
-        }
-        const map = new Map();
-        let totalAc = 0, totalEr = 0, totalAl = 0;
-        agrup.forEach(a => {
-            const d = a[key]; if (!d || typeof d !== 'object') return;
-            const qs = d.questoes_status || []; totalAl++;
-            if (Array.isArray(qs) && qs.length > 0) qs.forEach((q, ix) => {
-                const num = q.numero || ix + 1;
-                if (!map.has(num)) map.set(num, { acertos: 0, erros: 0, gabarito: '', bncc: '', contagem: {} });
-                const dd = map.get(num);
-                const r = q.resposta || '', g = q.gabarito || '';
-                if (!dd.gabarito && g && g !== '—' && g !== '-') dd.gabarito = String(g).toUpperCase().trim();
-                if (!dd.bncc && q.bncc) dd.bncc = String(q.bncc).trim();
-                const rv = r && r !== '—' && r !== '-';
-                if (rv) { const letra = String(r).toUpperCase().trim(); dd.contagem[letra] = (dd.contagem[letra] || 0) + 1; }
-                const ic = rv && r.toUpperCase() === g.toUpperCase();
-                if (ic || q.acertou === true) { dd.acertos++; totalAc++; } else { dd.erros++; totalEr++; }
-            });
-        });
-        const tot = map.size || 20;
-        if (totEl) totEl.textContent = tot + ' questões';
-        if (taEl) taEl.textContent = totalAc;
-        if (teEl) teEl.textContent = totalEr;
-        if (meEl) meEl.textContent = (totalAl > 0 && tot > 0 ? Math.round((totalAc / (totalAl * tot)) * 100) : 0) + '%';
-        if (cont) {
-            cont.innerHTML = '';
-            const keys = Array.from(map.keys()).sort((a, b) => a - b);
-            if (keys.length === 0) {
-                cont.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3);">Nenhum dado</div>';
-                return;
-            }
-            const gabaritoInline = keys.map(num => {
-                const d = map.get(num);
-                return `<span style="background:rgba(139,92,246,.15);color:#a78bfa;padding:3px 10px;border-radius:6px;font-weight:700;font-size:12px;font-family:'Courier New',monospace;border:1px solid rgba(139,92,246,.3);">Q${num}: <strong>${d.gabarito || '?'}</strong></span>`;
-            }).join(' ');
-            const cab = document.createElement('div');
-            cab.style.cssText = 'grid-column:1/-1;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(59,130,246,.10));border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid rgba(139,92,246,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;';
-            cab.innerHTML = `
-                <div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center;">
-                    📋 Gabarito Oficial da Prova
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%;">${gabaritoInline}</div>
-            `;
-            cont.appendChild(cab);
-            keys.forEach(num => {
-                const d = map.get(num); const t = d.acertos + d.erros;
-                const pa = t > 0 ? Math.round((d.acertos / t) * 100) : 0;
-                const div = document.createElement('div');
-                div.className = 'acertos-por-questao-item';
-                div.style.cssText = 'background:var(--surface);border-radius:10px;padding:12px 8px;border:1px solid var(--border);text-align:center;position:relative;';
-                const cb = pa >= 80 ? '#10b981' : pa >= 60 ? '#f59e0b' : '#ef4444';
-                const respOrdenado = Object.entries(d.contagem).sort((a, b) => b[1] - a[1]);
-                const respTop = respOrdenado.length > 0 ? respOrdenado[0][0] : '';
-                const respAcertou = respTop && d.gabarito && respTop === d.gabarito;
-                const corResp = !respTop ? '#94a3b8' : (respAcertou ? '#10b981' : '#ef4444');
-                const letras = Object.keys(d.contagem).sort();
-                const breakdown = letras.length > 0 ? letras.map(l => {
-                    const qtd = d.contagem[l];
-                    const isGab = l === d.gabarito;
-                    return `<span style="font-size:9px;font-weight:700;color:${isGab ? '#10b981' : '#ef4444'};background:${isGab ? 'rgba(16,185,129,.12)' : 'rgba(239,68,68,.10)'};padding:1px 5px;border-radius:3px;font-family:'Courier New',monospace;border:1px solid ${isGab ? 'rgba(16,185,129,.3)' : 'rgba(239,68,68,.2)'};">${l}:${qtd}</span>`;
-                }).join(' ') : '<span style="font-size:9px;color:var(--text3);">sem respostas</span>';
-                div.innerHTML = `
-                    <div style="font-size:14px;font-weight:800;margin-bottom:5px;">Q${num}</div>
-                    <div style="display:flex;justify-content:center;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
-                        ${respTop ? `<span style="font-size:10px;font-weight:800;color:${corResp};background:${corResp}22;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;border:1px solid ${corResp}55;" title="Resposta do aluno">RESP: ${respTop} ${respAcertou ? '✓' : '✗'}</span>` : ''}
-                    </div>
-                    <div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:7px;">${breakdown}</div>
-                    <div style="display:flex;justify-content:center;gap:4px;font-size:16px;font-weight:700;">
-                        <span style="color:var(--green);">${d.acertos}</span>
-                        <span style="color:var(--text3);">/</span>
-                        <span style="color:var(--red);">${d.erros}</span>
-                    </div>
-                    <div style="font-size:9px;color:var(--text3);margin-bottom:4px;">Acertos / Erros</div>
-                    <div class="progress" style="height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;margin:6px 0;">
-                        <div class="progress-fill" style="width:${Math.max(pa, 2)}%;background:${cb};border-radius:6px;"></div>
-                    </div>
-                    <div style="display:flex;justify-content:center;gap:10px;font-size:11px;font-weight:700;">
-                        <span style="color:${cb};">${pa}%</span>
-                    </div>
-                    ${d.bncc ? `<div style="font-size:8px;color:var(--purple);margin-top:3px;font-weight:600;" title="Código BNCC">${d.bncc}</div>` : ''}
-                `;
-                cont.appendChild(div);
-            });
-        }
-    } catch (e) { console.error(e); }
 }
 
 function imprimirRelatorioTurma() {
