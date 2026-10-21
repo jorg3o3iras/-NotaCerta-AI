@@ -94,12 +94,14 @@ def get_pool_status():
     if not pool:
         return None
     try:
+        disponiveis = len(pool._pool)
+        em_uso = len(pool._used)
         return {
             'minconn': pool.minconn,
             'maxconn': pool.maxconn,
-            'disponiveis_na_pool': len(pool._pool),
-            'em_uso': pool.maxconn - len(pool._pool),
-            'total_criadas': len(pool._used) + len(pool._pool),
+            'disponiveis_na_pool': disponiveis,
+            'em_uso': em_uso,
+            'total_criadas': disponiveis + em_uso,
         }
     except Exception:
         return None
