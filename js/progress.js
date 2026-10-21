@@ -1,5 +1,5 @@
 // progress.js
-const progressManager = {
+window.progressManager = {
     overlay: null,
     iniciar(titulo, etapas, icone) {
         this.overlay = document.getElementById('progress-modal');
@@ -31,7 +31,7 @@ const progressManager = {
     fechar() { if (this.overlay) this.overlay.style.display = 'none'; }
 };
 
-const tableFeedback = {
+window.tableFeedback = {
     destacarLinha(tbodyId, id, texto) {
         setTimeout(() => {
             const tb = document.getElementById(tbodyId);
