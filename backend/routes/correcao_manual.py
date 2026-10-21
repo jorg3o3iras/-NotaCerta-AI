@@ -17,11 +17,14 @@ def corrigir_manual():
     try:
         data = request.json or {}
         prova_id = data.get('prova_id'); aluno_id = data.get('aluno_id')
-        respostas = data.get('respostas', [])
-        acertos = data.get('acertos', 0); nota = data.get('nota', 0)
-        total = data.get('total', 0)
+        respostas = data.get('respostas') or []           # ← FIX
+        acertos = data.get('acertos', 0) or 0
+        nota = data.get('nota', 0) or 0
+        total = data.get('total', 0) or 0
         if not prova_id or not aluno_id:
             return jsonify({'erro': 'Prova e aluno obrigatórios'}), 400
+        if total <= 0:
+            return jsonify({'erro': 'Total de questões inválido'}), 400
         try: escola_sessao = get_escola_id()
         except PermissionError as e: return jsonify({'erro': str(e)}), 403
         conn = get_db_connection()
@@ -39,8 +42,8 @@ def corrigir_manual():
             return jsonify({'erro': 'Use SALVAR NOTA', 'tipo': 'producao'}), 400
         prova_titulo = prova['titulo'] if prova else ''
         serie_prova = prova['serie'] if prova else ''
-        gabarito = prova['gabarito'] if prova else []
-        bncc_gab = prova['bncc'] if prova else []
+        gabarito = (prova['gabarito'] if prova else []) or []   # ← FIX None-safe
+        bncc_gab = (prova['bncc'] if prova else []) or []       # ← FIX None-safe
         cur.execute("SELECT t.serie FROM alunos a LEFT JOIN turmas t ON a.turma_id=t.id WHERE a.id=%s", (aluno_id,))
         s = cur.fetchone()
         serie = s['serie'] if s else serie_prova or '1º Ano'
