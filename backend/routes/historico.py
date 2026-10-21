@@ -196,12 +196,17 @@ def historico_agrupado():
             prod = dict(av.get('Producao', default))
             ch = dict(av.get('CH', default))
             cn = dict(av.get('CN', default))
-            notas = [port.get('nota',0), mat.get('nota',0), prod.get('nota',0), ch.get('nota',0), cn.get('nota',0)]
-            soma = sum(notas); media = soma / 5 if notas else 0
+            # ═══ NOVA LINHA ═══
+            ingles = dict(av.get('Ingles', default))
+            notas = [port.get('nota',0), mat.get('nota',0), prod.get('nota',0), ch.get('nota',0), cn.get('nota',0), ingles.get('nota',0)]
+            soma = sum(notas); media = soma / 6 if notas else 0
             resultado.append({'aluno_id': d['aluno_id'], 'aluno_nome': d['aluno_nome'],
                               'serie': d['serie'], 'turma': d['turma'], 'escola': d['escola'],
                               'portugues': port, 'matematica': mat, 'producao': prod,
-                              'ch': ch, 'cn': cn, 'soma': round(soma, 1), 'media': round(media, 1)})
+                              'ch': ch, 'cn': cn,
+                              # ═══ NOVA CHAVE ═══
+                              'ingles': ingles,
+                              'soma': round(soma, 1), 'media': round(media, 1)})
         return jsonify(resultado)
     except Exception as e:
         traceback.print_exc()
