@@ -1,0 +1,40 @@
+O que eu faria no seu lugar (próximos 6 meses)
+Mês 1 — Fechar o básico de produto
+Login com sessão (já em progresso)
+
+Guards em todas as rotas
+
+Isolamento por escola em provas
+
+Botão "Ver cartão original" funcionando nos 2 fluxos
+
+Mês 2 — Fechar o básico de operação
+Rate limit
+
+Log de custo OpenAI (quantos tokens por correção)
+
+/health com status do pool e da OpenAI
+
+Testes em concepts.py + _parse_respostas_ia
+
+Mês 3 — Primeiro cliente real
+Você já tem sistema. Escolhe 1 escola (pode ser a que você conhece) e bota pra rodar 1 bimestre inteiro
+
+Coleta feedback brutalmente honesto
+
+Corrige o que aparecer
+
+Mês 4-5 — Refinar
+Recuperação de senha (email)
+
+Relatórios em PDF/Excel
+
+Dashboard com tendência (evolução do aluno ao longo do bimestre)
+
+Mês 6 — Escalar
+Onboarding self-service (escola se cadastra, paga, usa)
+
+Planos (free trial 30 dias → pago)
+
+Termos LGPD + política de privacidade
+
