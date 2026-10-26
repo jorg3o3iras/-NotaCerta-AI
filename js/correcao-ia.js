@@ -113,7 +113,7 @@ async function carregarAlunosPorProvaFiltrados(provaId) {
 }
 
 async function processarComIA(imagemBase64) {
-    // ✨ Salva a imagem para o modal "Ver cartão"
+    // ✨ Guarda a imagem para o modal "Ver cartão"
     window._ultimaImagemCorrigida = imagemBase64;
 
     const escolaId = document.getElementById('corrigir-escola')?.value;
@@ -328,12 +328,11 @@ async function salvarCorrecao() {
 
 // ═══════════════════════════════════════════════════════════════════
 // ✨ CORREÇÃO AUTOMÁTICA POR QR CODE
+// (variável autoModoAtivo já existe no camera.js — NÃO redeclarar)
 // ═══════════════════════════════════════════════════════════════════
 
-let autoModoAtivo = false;
-
 function abrirCameraAutomatico() {
-    autoModoAtivo = true;
+    window.autoModoAtivo = true;
     if (typeof abrirCamera === 'function') abrirCamera();
 }
 
@@ -362,7 +361,6 @@ async function corrigirAutomatico() {
     const imagem = window._autoImagem;
     if (!imagem) { showToast('❌ Nenhuma imagem carregada', 'error'); return; }
 
-    // ✨ Guarda a imagem para o modal "Ver cartão"
     window._ultimaImagemCorrigida = imagem;
 
     const resultadoDiv = document.getElementById('auto-resultado');
@@ -628,4 +626,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ correcao-ia.js carregado (fluxo QR Code + modal Ver Cartão + câmera auto)');
+console.log('✅ correcao-ia.js carregado (QR Code + modal Ver Cartão)');
