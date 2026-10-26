@@ -1,1100 +1,1141 @@
-/* ============================================
-   CorrigePro — VIVO Edition
-   Tema Colorido, Diferentão, Premium
-   VERSÃO CORRIGIDA — css auditada e completada
-   ============================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
-
-:root {
-    --bg: #0a0a1a;
-    --bg2: #12122a;
-    --surface: rgba(22, 22, 48, 0.8);
-    --surface2: rgba(35, 35, 68, 0.9);
-    --surface-glass: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #f8f9ff;
-    --text2: #a5a6c5;
-    --text3: #6c6d8a;
-    --r: 18px;
-    --r-sm: 12px;
-    --r-lg: 24px;
-
-    --blue: #5a6bff;
-    --cyan: #00e5ff;
-    --green: #00f2a6;
-    --orange: #ff9a3c;
-    --red: #ff4d6a;
-    --purple: #a855ff;
-    --pink: #ff4ecd;
-    --yellow: #ffe14c;
-    --teal: #14f1d9;
-
-    --grad-main: linear-gradient(135deg, #a855ff 0%, #5a6bff 40%, #00e5ff 100%);
-    --grad-blue: linear-gradient(135deg, #5a6bff, #00e5ff);
-    --grad-purple: linear-gradient(135deg, #a855ff, #ff4ecd);
-    --grad-green: linear-gradient(135deg, #00f2a6, #14f1d9);
-    --grad-orange: linear-gradient(135deg, #ff9a3c, #ff4d6a);
-    --grad-pink: linear-gradient(135deg, #ff4ecd, #a855ff);
-    --grad-rainbow: linear-gradient(135deg, #ff4ecd, #a855ff, #5a6bff, #00e5ff, #00f2a6);
-
-    --shadow: 0 10px 40px rgba(0,0,0,0.4);
-    --shadow-glow-blue: 0 0 40px rgba(90,107,255,0.25);
-    --shadow-glow-purple: 0 0 40px rgba(168,85,255,0.25);
-    --shadow-glow-green: 0 0 40px rgba(0,242,166,0.25);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-    font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* FUNDO VIVO MESH */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(800px 600px at 10% 10%, rgba(168,85,255,0.18), transparent),
-        radial-gradient(700px 500px at 90% 20%, rgba(0,229,255,0.15), transparent),
-        radial-gradient(600px 600px at 50% 100%, rgba(255,78,205,0.12), transparent),
-        radial-gradient(500px 400px at 80% 80%, rgba(90,107,255,0.18), transparent);
-    pointer-events: none;
-    z-index: -1;
-}
-
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: linear-gradient(var(--purple), var(--blue)); border-radius: 10px; }
-
-#app { display: flex; height: 100vh; overflow: hidden; }
-
-/* MENU MOBILE */
-.menu-toggle {
-    display: none;
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 1100;
-    background: var(--surface-glass);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-}
-.menu-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(5,5,15,0.7);
-    z-index: 999;
-    backdrop-filter: blur(12px);
-}
-/* ✨ CORRIGIDO: o JS do index.html usa classList.toggle("active"),
-   mas o CSS original só ativava com ".show".
-   Agora aceita AMBOS para não quebrar nada. */
-.menu-overlay.show,
-.menu-overlay.active { display: block; }
-
-/* SIDEBAR */
-.sidebar {
-    width: 280px;
-    background: rgba(15,15,35,0.75);
-    backdrop-filter: blur(24px) saturate(1.5);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow-y: auto;
-    padding: 18px 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 1000;
-    transition: transform 0.35s cubic-bezier(.32,1,.68,1);
-}
-.sidebar.open { transform: translateX(0) !important; }
-
-.sb-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 20px 20px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 14px;
-}
-.sb-logo img { display: block; filter: drop-shadow(0 0 12px rgba(168,85,255,0.5)); }
-.sb-brand-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    background: var(--grad-rainbow);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-}
-.sb-brand-name span { font-weight: 400; -webkit-text-fill-color: var(--text2); }
-
-.sb-nav { flex: 1; overflow-y: auto; padding: 0 12px; }
-.sb-section {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 16px 14px 8px;
-}
-.sb-item {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    color: var(--text2);
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(.2,.8,.2,1);
-    margin-bottom: 3px;
-    border: 1px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-.sb-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--surface-glass);
-    opacity: 0;
-    transition: .25s;
-}
-.sb-item:hover { color: var(--text); border-color: var(--border); transform: translateX(3px); }
-.sb-item:hover::before { opacity: 1; }
-.sb-item.active {
-    background: linear-gradient(135deg, rgba(168,85,255,0.18), rgba(90,107,255,0.18));
-    color: #fff;
-    border-color: rgba(168,85,255,0.35);
-    box-shadow: var(--shadow-glow-purple);
-}
-.sb-ico { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; z-index: 1; }
-.sb-badge {
-    font-size: 9px;
-    font-weight: 800;
-    background: var(--grad-pink);
-    color: #fff;
-    padding: 3px 9px;
-    border-radius: 20px;
-    margin-left: auto;
-    box-shadow: 0 2px 10px rgba(255,78,205,0.4);
-}
-
-/* CONTEÚDO */
-.content { flex: 1; margin-left: 280px; padding: 28px 32px; overflow-y: auto; height: 100vh; }
-.page { display: none; animation: fadeUp .4s cubic-bezier(.2,.8,.2,1); }
-.page.active { display: block; }
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px) scale(.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
-.page-title { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.8px; }
-.page-sub { font-size: 14px; color: var(--text2); margin-top: 4px; }
-.page-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-/* STATS CARDS */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
-.stat-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    padding: 20px 22px;
-    display: flex; align-items: center; gap: 16px;
-    transition: all 0.35s cubic-bezier(.2,.8,.2,1);
-    position: relative; overflow: hidden;
-}
-.stat-card::after {
-    content: '';
-    position: absolute;
-    top: -50%; right: -30%;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(255,255,255,0.06), transparent);
-    pointer-events: none;
-}
-.stat-card:hover { transform: translateY(-4px) scale(1.01); border-color: var(--border2); box-shadow: var(--shadow); }
-.stat-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 26px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
-}
-.stat-icon.blue { background: var(--grad-blue); box-shadow: 0 8px 20px rgba(90,107,255,0.35); }
-.stat-icon.green { background: var(--grad-green); box-shadow: 0 8px 20px rgba(0,242,166,0.35); }
-.stat-icon.orange { background: var(--grad-orange); box-shadow: 0 8px 20px rgba(255,154,60,0.35); }
-.stat-icon.purple { background: var(--grad-purple); box-shadow: 0 8px 20px rgba(168,85,255,0.35); }
-.stat-val { font-family: 'Space Grotesk'; font-size: 32px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
-.stat-label { font-size: 12px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
-
-/* ═══ NOVO: wrapper do ícone no stat-card ═══ */
-.stat-top {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-/* CARDS */
-.card {
-    background: rgba(20,20,45,0.6);
-    backdrop-filter: blur(20px) saturate(1.3);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    padding: 22px 24px;
-    margin-bottom: 18px;
-    transition: .3s;
-    position: relative;
-}
-.card:hover { border-color: var(--border2); }
-.card-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-.card-title { font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; }
-.card-glow-blue { border-color: rgba(90,107,255,0.35); box-shadow: var(--shadow-glow-blue); }
-.card-glow-green { border-color: rgba(0,242,166,0.35); box-shadow: var(--shadow-glow-green); }
-.card-glow-purple { border-color: rgba(168,85,255,0.35); box-shadow: var(--shadow-glow-purple); }
-
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-
-/* FORM */
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.form-row.c1 { grid-template-columns: 1fr; }
-.form-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-row.c4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 11px; font-weight: 800; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; }
-.form-control {
-    padding: 11px 14px; background: rgba(0,0,0,0.25);
-    border: 1.5px solid var(--border); border-radius: 12px;
-    color: var(--text); font-size: 14px; outline: none; transition: all .3s; width: 100%;
-}
-.form-control:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(168,85,255,0.15); background: rgba(0,0,0,0.35); }
-.form-control option { background: #12122a; }
-.req { color: var(--red); }
-.form-hint { font-size: 11px; color: var(--text3); }
-
-/* BOTÕES */
-.btn {
-    padding: 10px 18px; border: none; border-radius: 12px; font-size: 13.5px; font-weight: 700;
-    cursor: pointer; transition: all 0.25s cubic-bezier(.2,.8,.2,1);
-    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
-    position: relative; overflow: hidden;
-}
-.btn::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent); opacity:0; transition:.2s; }
-.btn:hover::after { opacity:1; }
-.btn:hover { transform: translateY(-2px) scale(1.02); }
-.btn:active { transform: translateY(0) scale(.98); }
-
-.btn-primary { background: var(--grad-blue); color: #fff; box-shadow: 0 6px 20px rgba(90,107,255,0.35); }
-.btn-green { background: var(--grad-green); color: #0a1a14; box-shadow: 0 6px 20px rgba(0,242,166,0.35); }
-.btn-purple { background: var(--grad-purple); color: #fff; box-shadow: 0 6px 20px rgba(168,85,255,0.35); }
-.btn-red { background: linear-gradient(135deg, #ff4d6a, #ff2e63); color: #fff; box-shadow: 0 6px 20px rgba(255,77,106,0.35); }
-.btn-orange { background: var(--grad-orange); color: #fff; box-shadow: 0 6px 20px rgba(255,154,60,0.35); }
-.btn-outline { background: var(--surface-glass); border: 1.5px solid var(--border2); color: var(--text); backdrop-filter: blur(10px); }
-.btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
-.btn-ghost { background: transparent; color: var(--text2); }
-.btn-ghost:hover { background: var(--surface-glass); color: var(--text); }
-.btn-sm { padding: 6px 14px; font-size: 11.5px; border-radius: 10px; }
-.btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 14px; }
-.btn-full { width: 100%; justify-content: center; }
-.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* BADGES */
-.badge {
-    display: inline-flex; align-items: center;
-    padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: .5px; border: 1px solid;
-}
-.badge-blue { background: rgba(90,107,255,0.15); color: #7c8cff; border-color: rgba(90,107,255,0.3); }
-.badge-green { background: rgba(0,242,166,0.15); color: var(--green); border-color: rgba(0,242,166,0.3); }
-.badge-red { background: rgba(255,77,106,0.15); color: var(--red); border-color: rgba(255,77,106,0.3); }
-.badge-orange { background: rgba(255,154,60,0.15); color: var(--orange); border-color: rgba(255,154,60,0.3); }
-.badge-purple { background: rgba(168,85,255,0.15); color: #c084ff; border-color: rgba(168,85,255,0.3); }
-.badge-cyan { background: rgba(0,229,255,0.15); color: var(--cyan); border-color: rgba(0,229,255,0.3); }
-.badge-gray { background: rgba(255,255,255,0.06); color: var(--text2); border-color: var(--border); }
-
-/* TABELAS */
-.table-wrap { overflow-x: auto; border-radius: var(--r); border: 1px solid var(--border); background: rgba(0,0,0,0.15); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: center; padding: 12px 8px; font-weight: 800; color: var(--text2); border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; letter-spacing: .8px; background: rgba(255,255,255,0.02); }
-td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); text-align: center; vertical-align: middle; }
-tr:hover td { background: rgba(255,255,255,0.03); }
-
-/* BUSCA */
-.search-wrap {
-    display: flex; align-items: center;
-    background: rgba(0,0,0,0.25); border: 1.5px solid var(--border);
-    border-radius: 12px; padding: 0 14px; transition: all .3s;
-}
-.search-wrap:focus-within { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(168,85,255,0.15); }
-.search-ico { font-size: 15px; color: var(--text3); margin-right: 10px; }
-.search-wrap input { background: transparent; border: none; padding: 10px 0; color: var(--text); font-size: 13px; outline: none; width: 160px; }
-
-/* UPLOAD */
-.upload-zone {
-    border: 2px dashed rgba(168,85,255,0.4); border-radius: var(--r-lg);
-    padding: 36px 24px; text-align: center; cursor: pointer; transition: all .35s;
-    background: linear-gradient(135deg, rgba(168,85,255,0.06), rgba(90,107,255,0.04));
-}
-.upload-zone:hover { border-color: var(--purple); background: linear-gradient(135deg, rgba(168,85,255,0.12), rgba(90,107,255,0.08)); transform: scale(1.01); }
-.uz-ico { font-size: 44px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(168,85,255,0.5)); }
-.uz-hint { font-size: 12px; color: var(--text3); margin-top: 6px; }
-
-/* AI HERO */
-.ai-hero {
-    background: linear-gradient(135deg, rgba(168,85,255,0.14), rgba(90,107,255,0.10), rgba(0,229,255,0.08));
-    border: 1px solid rgba(168,85,255,0.22);
-    border-radius: var(--r-lg);
-    padding: 24px 26px;
-    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;
-    position: relative; overflow: hidden;
-}
-.ai-hero::before {
-    content:''; position:absolute; top:-40%; left:-20%; width:80%; height:200%;
-    background: radial-gradient(ellipse, rgba(168,85,255,0.15), transparent 70%);
-    pointer-events:none;
-}
-.ai-hero-icon { font-size: 48px; filter: drop-shadow(0 0 16px rgba(168,85,255,0.6)); }
-.ai-hero-text { flex: 1; min-width: 180px; z-index:1; }
-.ai-hero-text h3 { font-family:'Space Grotesk'; font-size: 18px; font-weight: 800; margin-bottom: 3px; }
-.ai-hero-text p { font-size: 13.5px; color: var(--text2); }
-.ai-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; z-index:1; }
-
-/* FEATURE BUTTONS */
-.ai-feature-btn {
-    flex: 1; min-width: 130px;
-    background: rgba(255,255,255,0.04); backdrop-filter: blur(12px);
-    border: 1px solid var(--border); border-radius: var(--r-lg);
-    padding: 18px 16px; text-align: center; cursor: pointer;
-    transition: all 0.35s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden;
-}
-.ai-feature-btn::before {
-    content:''; position:absolute; inset:0; opacity:0; transition:.35s;
-}
-.ai-feature-btn:hover { transform: translateY(-5px) scale(1.02); border-color: rgba(255,255,255,0.2); box-shadow: var(--shadow); }
-.ai-feature-btn:hover::before { opacity: 1; }
-.af-ico { font-size: 30px; margin-bottom: 6px; position:relative; z-index:1; }
-.af-title { font-size: 14px; font-weight: 800; position:relative; z-index:1; }
-.af-sub { font-size: 11px; color: var(--text3); position:relative; z-index:1; }
-
-.ai-feature-btn.afb-purple { border-color: rgba(168,85,255,0.4); }
-.ai-feature-btn.afb-purple::before { background: linear-gradient(135deg, rgba(168,85,255,0.15), rgba(255,78,205,0.08)); }
-.ai-feature-btn.afb-blue::before { background: linear-gradient(135deg, rgba(90,107,255,0.15), rgba(0,229,255,0.08)); }
-.ai-feature-btn.afb-green::before { background: linear-gradient(135deg, rgba(0,242,166,0.15), rgba(20,241,217,0.08)); }
-.ai-feature-btn.afb-red::before { background: linear-gradient(135deg, rgba(255,77,106,0.15), rgba(255,154,60,0.08)); }
-
-/* ═══════════════════════════════════════════════════════════
-   GABARITO — Grid + Produção de Texto
-   ═══════════════════════════════════════════════════════════ */
-.gab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin: 16px 0; }
-
-/* ═══ NOVO: cabeçalho do gabarito (nome da prova + badge) ═══ */
-.gab-header-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    background: rgba(168,85,255,0.08);
-    border: 1px solid rgba(168,85,255,0.2);
-    border-radius: 12px;
-    margin-bottom: 14px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text2);
-}
-.gab-header-title .icon { font-size: 20px; }
-.gab-header-title .prova-nome { color: var(--purple); font-weight: 800; }
-.gab-header-title .badge-disciplina {
-    background: var(--grad-purple);
-    color: #fff;
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-size: 10px;
-    font-weight: 800;
-    margin-left: auto;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* ═══ NOVO: itens do gabarito padrão (Q1, Q2...) ═══ */
-.gab-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 10px;
-    text-align: center;
-    transition: all .25s;
-}
-.gab-item:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
-.gab-num {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--purple);
-    margin-bottom: 6px;
-    letter-spacing: 0.3px;
-}
-.gab-select {
-    width: 100%;
-    padding: 8px 6px;
-    background: var(--bg2);
-    border: 2px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 800;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    outline: none;
-}
-.gab-select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(168,85,255,0.15); }
-.gab-select.filled {
-    background: rgba(0,242,166,0.1);
-    border-color: var(--green);
-    color: var(--green);
-}
-.gab-bncc {
-    width: 100%;
-    margin-top: 4px;
-    padding: 5px 8px;
-    background: var(--bg);
-    border: 2px solid var(--border2);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 10px;
-    text-align: center;
-    outline: none;
-    transition: all .2s;
-}
-.gab-bncc:focus { border-color: var(--purple); }
-
-/* ═══ NOVO: gabarito de Produção de Texto ═══ */
-.gab-producao-questao {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    transition: all .25s;
-}
-.gab-producao-questao:hover { border-color: rgba(139,92,246,0.4); }
-.gab-producao-header {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-.gab-titulo-editavel {
-    padding: 10px 14px;
-    background: var(--bg);
-    border: 2px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 700;
-    outline: none;
-    transition: all .2s;
-}
-.gab-titulo-editavel:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(168,85,255,0.15); }
-.gab-cabecalho {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--bg);
-    border: 2px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 44px;
-    outline: none;
-    transition: all .2s;
-}
-.gab-cabecalho:focus { border-color: var(--purple); }
-
-.gab-alternativas-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.gab-alternativa-item {
-    display: grid;
-    grid-template-columns: 32px 1fr 32px;
-    gap: 10px;
-    align-items: start;
-}
-.alt-letra {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--grad-purple);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 14px;
-    box-shadow: 0 4px 12px rgba(168,85,255,0.35);
-    flex-shrink: 0;
-}
-.alt-texto {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--bg);
-    border: 2px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 48px;
-    outline: none;
-    transition: all .2s;
-}
-.alt-texto:focus { border-color: var(--purple); }
-.btn-remover-alt {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,77,106,0.12);
-    border: 1px solid rgba(255,77,106,0.3);
-    color: var(--red);
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all .2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-remover-alt:hover { background: rgba(255,77,106,0.25); transform: scale(1.1); }
-
-/* IA CRITÉRIOS */
-.ai-criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
-.ai-crit { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; backdrop-filter: blur(10px); }
-.ai-crit-name { font-size: 11px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-.ai-crit-val { font-family:'Space Grotesk'; font-size: 24px; font-weight: 800; background: var(--grad-purple); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.ai-feedback-box { background: rgba(168,85,255,0.08); border-radius: 14px; padding: 16px 20px; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(168,85,255,0.18); border-left: 4px solid var(--purple); }
-
-/* PROGRESS */
-.progress { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 100px; overflow: hidden; margin-top: 6px; }
-.progress-fill { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
-.pf-purple { background: var(--grad-purple); }
-.pf-green { background: var(--grad-green); }
-.pf-blue { background: var(--grad-blue); }
-.pf-orange { background: var(--grad-orange); }
-
-/* SPINNER */
-.spinner { width: 44px; height: 44px; border: 4px solid rgba(255,255,255,0.08); border-top: 4px solid var(--purple); border-right-color: var(--cyan); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; box-shadow: 0 0 20px rgba(168,85,255,0.3); }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* TABS */
-.tab-nav { display: flex; gap: 6px; background: rgba(0,0,0,0.25); padding: 5px; border-radius: 14px; margin-bottom: 16px; border: 1px solid var(--border); }
-.tab-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; color: var(--text2); font-weight: 700; font-size: 12.5px; cursor: pointer; transition: all 0.3s; background: transparent; }
-.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-.tab-btn.active { background: var(--grad-purple); color: #fff; box-shadow: 0 4px 16px rgba(168,85,255,0.35); }
-.tab-c { animation: fadeUp 0.3s ease; }
-
-/* CÂMERA */
-.cam-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(5,5,15,0.9); backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; }
-.cam-modal.show { display: flex; }
-.cam-container { background: rgba(22,22,48,0.9); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 24px; padding: 26px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
-.cam-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.cam-video-wrap { position: relative; border-radius: 16px; overflow: hidden; background: #000; border: 2px solid rgba(0,242,166,0.3); }
-.cam-video-wrap video { width: 100%; display: block; border-radius: 16px; }
-.cam-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; aspect-ratio: 10 / 14; border: 3px dashed rgba(0,242,166,0.9); border-radius: 16px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); z-index: 5; }
-.cam-corner { position: absolute; width: 34px; height: 34px; border-color: #00f2a6; border-style: solid; border-width: 0; z-index: 6; }
-.cc-tl { top: -4px; left: -4px; border-top-width: 5px; border-left-width: 5px; border-radius: 8px 0 0 0; }
-.cc-tr { top: -4px; right: -4px; border-top-width: 5px; border-right-width: 5px; border-radius: 0 8px 0 0; }
-.cc-bl { bottom: -4px; left: -4px; border-bottom-width: 5px; border-left-width: 5px; border-radius: 0 0 0 8px; }
-.cc-br { bottom: -4px; right: -4px; border-bottom-width: 5px; border-right-width: 5px; border-radius: 0 0 8px 0; }
-.cam-scan-line { position: absolute; top: 0; left: 10%; right: 10%; height: 3px; background: linear-gradient(90deg, transparent, var(--green), transparent); animation: scan 2s ease-in-out infinite; box-shadow: 0 0 20px rgba(0,242,166,0.6); z-index: 6; }
-@keyframes scan { 0%,100% { top: 5%; } 50% { top: 95%; } }
-.cam-controls { display: flex; gap: 12px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
-
-/* ═══ NOVO: dica de enquadramento da câmera ═══ */
-.cam-hint {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 10px;
-    font-weight: 600;
-}
-
-/* MODAIS */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(5,5,15,0.75); backdrop-filter: blur(16px); z-index: 9998; align-items: center; justify-content: center; padding: 20px; }
-.modal-overlay.show { display: flex; }
-.modal { background: rgba(20,20,45,0.85); backdrop-filter: blur(24px); border: 1px solid var(--border2); border-radius: 22px; padding: 28px 30px; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.modal-header h3 { font-family:'Space Grotesk'; font-size: 20px; font-weight: 700; }
-.modal-close { background: rgba(255,255,255,0.06); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 10px; color: var(--text2); font-size: 20px; cursor: pointer; transition: .2s; }
-.modal-close:hover { color: var(--text); background: rgba(255,255,255,0.1); }
-.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); }
-
-/* DEL MODAL */
-.del-modal { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px; }
-.del-modal.show { display: flex; }
-.del-box { background: rgba(22,22,48,0.95); border: 1px solid var(--border2); border-radius: 22px; padding: 36px 40px; max-width: 420px; width: 100%; text-align: center; box-shadow: var(--shadow); }
-.del-icon { font-size: 56px; margin-bottom: 12px; filter: drop-shadow(0 0 12px rgba(255,77,106,0.5)); }
-.del-box h3 { font-family:'Space Grotesk'; font-size: 22px; margin-bottom: 10px; }
-.del-box p { color: var(--text2); font-size: 14px; line-height: 1.7; }
-.del-nome-txt { color: var(--red); font-weight: 800; background: rgba(255,77,106,0.12); padding: 2px 8px; border-radius: 6px; }
-.del-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
-
-/* MULTI IMPORT */
-.multi-import-area { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin: 10px 0; }
-.multi-import-area textarea { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; outline: none; resize: vertical; min-height: 90px; font-family: inherit; }
-.multi-import-hint { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
-.multi-status { padding: 10px 14px; border-radius: 10px; margin: 8px 0; font-size: 12.5px; font-weight: 600; }
-.multi-status.info { background: rgba(90,107,255,0.12); border: 1px solid rgba(90,107,255,0.25); color: #7c8cff; }
-.multi-status.success { background: rgba(0,242,166,0.12); border: 1px solid rgba(0,242,166,0.25); color: var(--green); }
-.multi-status.error { background: rgba(255,77,106,0.12); border: 1px solid rgba(255,77,106,0.25); color: var(--red); }
-
-/* CORREÇÃO MANUAL — cabeçalho de informações */
-.correcao-aluno-info { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 16px 20px; margin-bottom: 18px; border: 1px solid var(--border); }
-.correcao-aluno-info .info-item { display: flex; flex-direction: column; gap: 3px; }
-.correcao-aluno-info .info-item .label { font-size: 9.5px; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; font-weight: 800; }
-.correcao-aluno-info .info-item strong { font-size: 14px; color: var(--text); }
-
-.correcao-manual-grid, .cm-grid-standalone {
-    display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px;
-    padding: 12px; margin: 12px 0; border-radius: 16px;
-    background: rgba(0,0,0,0.2); border: 1px solid var(--border);
-    max-height: 320px; overflow-y: auto;
-}
-
-/* ═══ NOVO: itens da grade de correção manual (dentro da IA) ═══ */
-.correcao-manual-item {
-    background: rgba(255,255,255,0.03);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transition: all .25s;
-}
-.correcao-manual-item:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
-.correcao-manual-item .q-num {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--purple);
-    letter-spacing: 0.3px;
-}
-.correcao-manual-item .q-resposta {
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1;
-    padding: 4px 0;
-}
-.correcao-manual-item .q-select {
-    width: 100%;
-    padding: 5px 4px;
-    background: var(--bg);
-    border: 1.5px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 800;
-    text-align: center;
-    cursor: pointer;
-    outline: none;
-    transition: all .2s;
-}
-.correcao-manual-item .q-select:focus { border-color: var(--purple); }
-.correcao-manual-item .q-select.correta {
-    border-color: var(--green);
-    background: rgba(0,242,166,0.1);
-    color: var(--green);
-}
-.correcao-manual-item .q-select.errada {
-    border-color: var(--red);
-    background: rgba(255,77,106,0.1);
-    color: var(--red);
-}
-.correcao-manual-item .q-status {
-    font-size: 14px;
-    line-height: 1;
-    min-height: 16px;
-}
-.correcao-manual-item .q-status.correta { color: var(--green); }
-.correcao-manual-item .q-status.errada { color: var(--red); }
-
-/* ═══ NOVO: itens da Correção Manual Standalone (disciplinas com alternativas) ═══ */
-.cm-item-standalone {
-    background: rgba(255,255,255,0.03);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    transition: all .25s;
-}
-.cm-item-standalone:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
-.cm-item-standalone .q-num {
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--purple);
-}
-.cm-item-standalone .q-gabarito {
-    font-size: 10px;
-    color: var(--text3);
-    font-weight: 700;
-    letter-spacing: 0.3px;
-}
-.cm-item-standalone .q-select-manual {
-    width: 100%;
-    padding: 5px 4px;
-    background: var(--bg);
-    border: 1.5px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 800;
-    text-align: center;
-    cursor: pointer;
-    outline: none;
-    transition: all .2s;
-}
-.cm-item-standalone .q-select-manual:focus { border-color: var(--purple); }
-.cm-item-standalone .q-select-manual.correta {
-    border-color: var(--green);
-    background: rgba(0,242,166,0.1);
-    color: var(--green);
-}
-.cm-item-standalone .q-select-manual.errada {
-    border-color: var(--red);
-    background: rgba(255,77,106,0.1);
-    color: var(--red);
-}
-.cm-item-standalone .q-status-icon {
-    font-size: 14px;
-    line-height: 1;
-    min-height: 16px;
-}
-
-/* ═══ NOVO: item de Produção de Texto na Correção Manual Standalone ═══ */
-.cm-item-producao {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: all .25s;
-}
-.cm-item-producao:hover { border-color: rgba(255,154,60,0.4); }
-.cm-q-cabecalho-inline {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--orange);
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    line-height: 1.4;
-}
-.cm-q-resposta-label {
-    font-size: 11px;
-    color: var(--text3);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-.cm-gabarito-formatado {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.alt-bloco {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--text2);
-}
-.alt-letra-gab {
-    background: var(--grad-purple);
-    color: #fff;
-    font-weight: 900;
-    font-size: 11px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-.alt-texto-gab { flex: 1; }
-.cm-q-resposta-texto {
-    width: 100%;
-    min-height: 60px;
-    padding: 10px 14px;
-    background: var(--bg);
-    border: 1.5px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: inherit;
-    resize: vertical;
-    outline: none;
-    transition: all .2s;
-}
-.cm-q-resposta-texto:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,154,60,0.15); }
-.cm-q-situacao-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.cm-q-situacao-label {
-    font-size: 11px;
-    color: var(--text3);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.cm-q-situacao-select {
-    padding: 8px 14px;
-    background: var(--bg);
-    border: 1.5px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    outline: none;
-    transition: all .2s;
-}
-.cm-q-situacao-select:focus { border-color: var(--orange); }
-
-/* RESUMO DA CORREÇÃO */
-.resumo-correcao { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 14px 0; }
-.resumo-correcao .item { text-align: center; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
-.resumo-correcao .item .valor { font-family:'Space Grotesk'; font-size: 28px; font-weight: 800; }
-.resumo-correcao .item .valor.acertos { color: var(--green); }
-.resumo-correcao .item .valor.erros { color: var(--red); }
-.resumo-correcao .item .valor.nota { background: var(--grad-blue); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-
-/* NOTA MANUAL */
-.cm-nota-titulo { font-family:'Space Grotesk'; font-size: 16px; font-weight: 800; background: var(--grad-orange); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom: 6px; }
-.cm-nota-sub { font-size: 12px; color: var(--text3); margin-bottom: 16px; line-height: 1.5; }
-.cm-nota-fields { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: end; margin-bottom: 14px; }
-.cm-nota-fields .form-control[type="number"] { font-size: 22px; font-weight: 800; text-align: center; color: var(--orange); }
-.cm-nota-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.btn-salvar-nota-cm { padding: 13px 34px; background: var(--grad-orange); color: #fff; font-size: 15px; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 6px 20px rgba(255,154,60,0.4); transition: all .25s; }
-.btn-salvar-nota-cm:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,154,60,0.5); }
-.btn-salvar-nota-cm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-/* ═══ NOVO: status de salvamento da nota de produção ═══ */
-.cm-nota-status {
-    padding: 10px 14px;
-    border-radius: 10px;
-    margin-top: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    display: none;
-    line-height: 1.4;
-}
-.cm-nota-status.sucesso {
-    display: block;
-    background: rgba(0,242,166,0.12);
-    border: 1px solid rgba(0,242,166,0.3);
-    color: var(--green);
-}
-.cm-nota-status.erro {
-    display: block;
-    background: rgba(255,77,106,0.12);
-    border: 1px solid rgba(255,77,106,0.3);
-    color: var(--red);
-}
-
-/* TOAST */
-.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; max-width: 380px; width: 100%; }
-.toast { padding: 14px 20px; border-radius: 16px; font-size: 14px; font-weight: 600; animation: slideIn .45s cubic-bezier(.2,.8,.2,1); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); backdrop-filter: blur(16px); border: 1px solid var(--border); background: rgba(22,22,48,0.9); }
-@keyframes slideIn { from { opacity: 0; transform: translateX(50px) scale(.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
-
-/* ELEMENTOS JS — Questões / Badges de conceito */
-.questao-item {
-    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-    border-radius: 12px; padding: 6px 4px; text-align: center; font-size: 10px;
-    display: flex; flex-direction: column; align-items: center; gap: 2px; transition: all .25s;
-}
-.questao-item:hover { transform: translateY(-2px); }
-.questao-item .q-num { font-size: 8px; color: var(--text3); font-weight: 800; }
-.questao-item .q-resp { font-weight: 800; font-size: 13px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 2px 6px; line-height: 22px; width: 100%; }
-.questao-item.acertou { border-color: rgba(0,242,166,0.5); background: rgba(0,242,166,0.08); box-shadow: 0 0 15px rgba(0,242,166,0.15); }
-.questao-item.acertou .q-resp { color: var(--green); }
-.questao-item.errou { border-color: rgba(255,77,106,0.5); background: rgba(255,77,106,0.08); box-shadow: 0 0 15px rgba(255,77,106,0.15); }
-.questao-item.errou .q-resp { color: var(--red); }
-
-.badge-conceito-inicial { background: rgba(255,77,106,0.18); color: #ff4d6a; border: 1px solid rgba(255,77,106,0.3); }
-.badge-conceito-basico { background: rgba(255,154,60,0.18); color: #ff9a3c; border: 1px solid rgba(255,154,60,0.3); }
-.badge-conceito-proficiente { background: rgba(90,107,255,0.18); color: #7c8cff; border: 1px solid rgba(90,107,255,0.3); }
-.badge-conceito-avancado { background: rgba(0,242,166,0.18); color: #00f2a6; border: 1px solid rgba(0,242,166,0.3); }
-
-.acertos-por-questao-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 12px 4px; }
-.col-disciplina { min-width: 75px; padding: 4px 2px; }
-
-/* ═══════════════════════════════════════════════════════════
-   PRINT-ONLY — CRÍTICO
-   Esconde os cabeçalhos de impressão na tela do navegador.
-   Sem isso, o bloco "📊 Relatório por Turma / Data: ..." aparece
-   no topo da página — era a causa do visual "feio".
-   ═══════════════════════════════════════════════════════════ */
-.print-only { display: none !important; }
-.print-header { margin-bottom: 20px; }
-.print-header h2 { font-size: 20px; margin-bottom: 6px; }
-.print-header p { font-size: 13px; color: var(--text2); }
-
-/* ═══════════════════════════════════════════════════════════
-   MEDIA QUERIES — MOBILE
-   ═══════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-    .menu-toggle { display: flex; align-items: center; justify-content: center; }
-    .sidebar { transform: translateX(-100%); width: 300px; }
-    .content { margin-left: 0; padding: 18px; padding-top: 76px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .g2 { grid-template-columns: 1fr; }
-    .form-row, .form-row.c3, .form-row.c4 { grid-template-columns: 1fr; }
-    .correcao-aluno-info { grid-template-columns: 1fr 1fr; }
-    .ai-criteria-grid { grid-template-columns: 1fr; }
-    .gab-producao-header { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-    .stats-grid { grid-template-columns: 1fr; }
-    .correcao-manual-grid, .cm-grid-standalone { grid-template-columns: repeat(4, 1fr); }
-    .gab-alternativa-item { grid-template-columns: 28px 1fr 28px; }
-    .alt-letra { width: 28px; height: 28px; font-size: 12px; }
-    .btn-remover-alt { width: 28px; height: 28px; font-size: 16px; }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PRINT — quando o usuário dá Ctrl+P
-   ═══════════════════════════════════════════════════════════ */
-@media print {
-    .no-print,
-    .menu-toggle,
-    .menu-overlay,
-    .sidebar,
-    .modal-overlay,
-    .del-modal,
-    .toast-container,
-    .cam-modal,
-    .btn,
-    .btn-group,
-    .search-wrap,
-    .page-actions,
-    .upload-zone,
-    .tab-nav,
-    .ai-feature-btn,
-    .ai-hero-actions { display: none !important; }
-
-    .print-only { display: block !important; }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FIX: Centralizar o modal de Disciplinas na tela
-   (por padrão o modal-overlay do sistema já centraliza,
-   mas este bloco força 100% independente de conflitos)
-   ═══════════════════════════════════════════════════════════ */
-
-#m-disciplina.modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    display: none;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 20px !important;
-    margin: 0 !important;
-    z-index: 9998 !important;
-    overflow: auto;
-}
-
-#m-disciplina.modal-overlay.show,
-#m-disciplina.modal-overlay[style*="flex"] {
-    display: flex !important;
-}
-
-#m-disciplina .modal {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-    margin: 0 auto !important;
-    max-width: 480px !important;
-    width: 100% !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   ✨ CORRIGIDO: Página de disciplinas
-   O CSS original tinha `margin-left: 50px` + `width: calc(100% - 280px)`
-   aplicados no `#page-disciplinas`, mas essa página JÁ ESTÁ DENTRO do
-   `.content` (que tem `margin-left: 280px`). Aplicar de novo encolhia
-   a página pela metade e desalinhava o conteúdo.
-   Agora: a página respeita 100% da largura disponível do container,
-   sem margem extra e sem width recalibrado.
-   ═══════════════════════════════════════════════════════════ */
-
-#page-disciplinas {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding: 28px 32px !important;
-    height: 100vh !important;
-    overflow-y: auto !important;
-    box-sizing: border-box !important;
-}
-
-/* Garante que ela só apareça quando estiver ativa */
-#page-disciplinas.active {
-    display: block !important;
-}
-
-/* Ajuste para celular/telas pequenas */
-@media (max-width: 1200px) {
-    #page-disciplinas {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 18px !important;
-        padding-top: 76px !important;
-    }
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NotaCerta AI — Sistema de Correção de Provas</title>
+    <link href="style.css" rel="stylesheet" />
+    <style>
+      :root { --sb-w: 260px; }
+      html, body { overflow-x: hidden; }
+      #app { display: flex; min-height: 100vh; width: 100%; }
+      .sidebar { width: var(--sb-w); flex-shrink: 0; transition: transform 0.3s ease; }
+      .content { flex: 1; min-width: 0; width: 100%; padding: 20px; box-sizing: border-box; }
+      .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+      .page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .page-actions .search-wrap, .page-actions .form-control { max-width: 100%; }
+      .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .form-row.c4 { grid-template-columns: repeat(4, 1fr); }
+      .form-row.c3 { grid-template-columns: repeat(3, 1fr); }
+      .form-row.c2, .form-row { grid-template-columns: repeat(2, 1fr); }
+      .form-row.c1 { grid-template-columns: 1fr; }
+      .form-row { display: grid; gap: 12px; }
+      .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .table-wrap table { min-width: 600px; }
+      .ai-hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .menu-toggle {
+        display: none; position: fixed; top: 14px; left: 14px; z-index: 1002;
+        width: 44px; height: 44px; border-radius: 10px;
+        border: 1px solid var(--border, #e5e7eb); background: #fff;
+        font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .menu-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0, 0, 0, 0.45); z-index: 1000;
+      }
+      .menu-overlay.active { display: block; }
+      .qr-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      @media (max-width: 1024px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .g2 { grid-template-columns: 1fr; }
+        .form-row.c4 { grid-template-columns: repeat(2, 1fr); }
+        .form-row.c3 { grid-template-columns: repeat(2, 1fr); }
+        .qr-actions { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 768px) {
+        .menu-toggle { display: flex; align-items: center; justify-content: center; }
+        .sidebar {
+          position: fixed; left: 0; top: 0; bottom: 0; z-index: 1001;
+          transform: translateX(-100%); overflow-y: auto;
+          background: var(--bg, #fff); box-shadow: 8px 0 30px rgba(0, 0, 0, 0.12);
+        }
+        .sidebar.open { transform: translateX(0); }
+        .content { padding: 70px 12px 20px 12px; }
+        .stats-grid { grid-template-columns: 1fr 1fr; }
+        .form-row.c4, .form-row.c3, .form-row.c2, .form-row { grid-template-columns: 1fr; }
+        .page-title { font-size: 20px; }
+        .page-sub { font-size: 12px; }
+        .btn-lg { padding: 12px !important; font-size: 14px !important; }
+        .ai-hero { flex-direction: column; align-items: flex-start; }
+        .table-wrap table { min-width: 520px; font-size: 13px; }
+        .page-actions .form-control { width: 100% !important; }
+        .search-wrap { width: 100%; }
+        .modal { width: 96vw !important; margin: 10px; max-height: 92vh; overflow-y: auto; }
+        .cam-container { width: 96vw; max-height: 96vh; }
+      }
+      @media (max-width: 480px) {
+        .stats-grid { grid-template-columns: 1fr; }
+        .qr-actions { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <button type="button" class="menu-toggle no-print" id="menuToggle" onclick="toggleMenu()" aria-label="Abrir menu">☰</button>
+    <div class="menu-overlay no-print" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <div id="app">
+      <div class="sidebar no-print" id="sidebar">
+        <div class="sb-brand">
+          <div class="sb-logo">
+            <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 26px;">🤖</div>
+          </div>
+          <div class="sb-brand-name">Nota<span>Certa</span> AI</div>
+        </div>
+        <div class="sb-nav">
+          <div id="adm-sb">
+            <div class="sb-section">Principal</div>
+            <div class="sb-item active" data-p="dashboard" onclick="go('dashboard'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">🏠</span> Dashboard</div>
+            <div class="sb-section">Cadastros</div>
+            <div class="sb-item" data-p="escola" onclick="go('escola'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">🏫</span> Escolas</div>
+            <div class="sb-item" data-p="turmas" onclick="go('turmas'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">👥</span> Turmas</div>
+            <div class="sb-item" data-p="alunos" onclick="go('alunos'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">🎒</span> Alunos</div>
+            <div class="sb-item" data-p="lista-turma" onclick="go('lista-turma'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📋</span> Cartão Resposta</div>
+            <div class="sb-section">Avaliações</div>
+            <div class="sb-item" data-p="prova-upload" onclick="go('prova-upload'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📤</span> Cadastrar Prova</div>
+            <div class="sb-item" data-p="provas" onclick="go('provas'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📑</span> Provas</div>
+            <div class="sb-item" data-p="gabarito" onclick="go('gabarito'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">✅</span> Gabarito</div>
+            <div class="sb-item" data-p="gabaritos" onclick="go('gabaritos'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📋</span> Gabaritos</div>
+            <div class="sb-section">IA &amp; Correção</div>
+            <div class="sb-item" data-p="corrigir-ia" onclick="go('corrigir-ia'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">🤖</span> Corrigir com IA <span class="sb-badge">IA</span></div>
+            <div class="sb-item" data-p="correcao-texto" onclick="go('correcao-texto'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📝</span> Texto com IA <span class="sb-badge">IA</span></div>
+            <div class="sb-item" onclick="abrirCorrecaoManualStandalone(); if (window.innerWidth <= 768) toggleMenu();" style="border-left: 3px solid var(--orange); background: rgba(245, 158, 11, 0.05);"><span class="sb-ico">✏</span> Correção Manual</div>
+            <div class="sb-section">Resultados</div>
+            <div class="sb-item" data-p="rel-turma" onclick="go('rel-turma'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📊</span> Rel. por Turma</div>
+            <div class="sb-section">Sistema</div>
+            <div class="sb-item" data-p="disciplinas" onclick="go('disciplinas'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">📚</span> Disciplinas</div>
+            <div class="sb-item" data-p="config" id="menu-config" onclick="go('config'); if (window.innerWidth <= 768) toggleMenu();"><span class="sb-ico">⚙</span> Configurações</div>
+          </div>
+        </div>
+      </div>
+      <div class="content">
+
+        <div class="page active" id="page-dashboard">
+          <div class="page-header">
+            <div>
+              <div class="page-title">🏠 Dashboard</div>
+              <p class="page-sub">Visão geral do sistema</p>
+            </div>
+            <div class="page-actions no-print">
+              <button type="button" class="btn btn-outline" onclick="abrirCamera()">📱 Câmera</button>
+              <button type="button" class="btn btn-primary" onclick="go('corrigir-ia')">🤖 Corrigir com IA</button>
+            </div>
+          </div>
+          <div class="print-header print-only">
+            <h2>📊 Relatório de Conceito</h2>
+            <p>Sistema de Correção de Provas</p>
+            <p style="font-size: 11px; color: #666">Data: <span id="print-data-dash"></span></p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card blue"><div class="stat-top"><div class="stat-icon blue">🏫</div></div><div><div><div class="stat-val" id="totalEscolas">0</div><div class="stat-label">Escolas</div></div></div></div>
+            <div class="stat-card green"><div class="stat-top"><div class="stat-icon green">👥</div></div><div><div><div class="stat-val" id="totalTurmas">0</div><div class="stat-label">Turmas</div></div></div></div>
+            <div class="stat-card orange"><div class="stat-top"><div class="stat-icon orange">🎒</div></div><div><div><div class="stat-val" id="totalAlunos">0</div><div class="stat-label">Alunos</div></div></div></div>
+            <div class="stat-card purple"><div class="stat-top"><div class="stat-icon purple">📄</div></div><div><div><div class="stat-val" id="totalProvas">0</div><div class="stat-label">Provas</div></div></div></div>
+          </div>
+          <div class="ai-hero no-print">
+            <div class="ai-hero-icon">🤖</div>
+            <div class="ai-hero-text">
+              <h3>Ferramentas de Inteligência Artificial</h3>
+              <p>Corrija cartões resposta, escaneie com câmera e avalie textos com o OpenAI</p>
+            </div>
+            <div class="ai-hero-actions">
+              <button type="button" class="btn btn-purple" onclick="go('corrigir-ia')">🤖 Corrigir com IA</button>
+              <button type="button" class="btn btn-outline" onclick="go('correcao-texto')">📝 Correção de Texto</button>
+            </div>
+          </div>
+          <div class="no-print" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px;">
+            <div class="ai-feature-btn afb-purple" onclick="go('corrigir-ia')"><div class="af-ico">🤖</div><div class="af-title">Corrigir com IA</div><div class="af-sub">Detecção automática</div></div>
+            <div class="ai-feature-btn afb-blue" onclick="abrirCamera()"><div class="af-ico">📱</div><div class="af-title">Câmera do Celular</div><div class="af-sub">Scan em tempo real</div></div>
+            <div class="ai-feature-btn afb-green" onclick="abrirArquivo()"><div class="af-ico">📂</div><div class="af-title">Escolher Arquivo</div><div class="af-sub">Imagem do cartão</div></div>
+            <div class="ai-feature-btn afb-red" onclick="go('correcao-texto')"><div class="af-ico">📝</div><div class="af-title">Correção de Texto</div><div class="af-sub">Coesão e coerência</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚡ Últimas Correções</div>
+              <span class="badge badge-green">● Ao Vivo</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Aluno</th><th>Prova</th><th>Porcentagem</th><th>Conceito</th></tr></thead>
+                <tbody id="ultimas-correcoes"><tr><td colspan="4" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-escola">
+          <div class="page-header">
+            <div><div class="page-title">🏫 Escolas</div><p class="page-sub">Gerencie as unidades de ensino cadastradas</p></div>
+            <div class="page-actions no-print">
+              <div class="search-wrap"><span class="search-ico">🔍</span><input oninput="filtrarTabela(this, 'tb-escola')" placeholder="Buscar escola..." type="text" /></div>
+              <button type="button" class="btn btn-primary" onclick="openM('m-escola')">+ Nova Escola</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Nome da Escola</th><th>Município</th><th>INEP</th><th>Diretor(a)</th><th>Turmas</th><th>Alunos</th><th>Ações</th></tr></thead>
+                <tbody id="tb-escola"><tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-turmas">
+          <div class="page-header">
+            <div><div class="page-title">👥 Turmas</div><p class="page-sub">1º Ano ao 9º Ano do Ensino Fundamental</p></div>
+            <div class="page-actions no-print">
+              <div class="search-wrap"><span class="search-ico">🔍</span><input oninput="filtrarTabela(this, 'tb-turmas')" placeholder="Buscar turma..." type="text" /></div>
+              <select class="form-control" id="filtro-escola-turmas" onchange="aplicarFiltrosTurmas()"><option value="">Todas as escolas</option></select>
+              <select class="form-control" id="filtro-serie-turmas" onchange="aplicarFiltrosTurmas()"><option value="">Todas as séries</option><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select>
+              <button type="button" class="btn btn-primary" onclick="aplicarFiltrosTurmas()">🔍 Filtrar</button>
+              <button type="button" class="btn btn-outline" onclick="limparFiltrosTurmas()">✕ Limpar</button>
+              <button type="button" class="btn btn-primary" onclick="openM('m-turma')">+ Nova Turma</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Turma</th><th>Série</th><th>Turno</th><th>Escola</th><th>Professor(a)</th><th>Alunos</th><th>Ações</th></tr></thead>
+                <tbody id="tb-turmas"><tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-lista-turma">
+          <div class="page-header">
+            <div><div class="page-title">📋 Lista de Alunos por Turma</div><p class="page-sub">Emissão oficial da lista de chamada</p></div>
+            <div class="page-actions no-print"><button type="button" class="btn btn-outline" onclick="window.print()">🖨 Imprimir</button></div>
+          </div>
+          <div class="card no-print">
+            <div class="form-row c3">
+              <div class="form-group"><label class="form-label">Escola</label><select class="form-control" id="lista-escola" onchange="carregarTurmasLista(this.value)"><option value="">Selecione a escola</option></select></div>
+              <div class="form-group"><label class="form-label">Série</label><select class="form-control" id="lista-serie"><option value="">Todas</option><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select></div>
+              <div class="form-group"><label class="form-label">Turma</label><select class="form-control" id="lista-turma"><option value="">Selecione a turma</option></select></div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="gerarListaTurma()">🔍 Gerar Lista</button>
+          </div>
+          <div class="card" id="lista-resultado"><div style="text-align: center; padding: 20px; color: var(--text3)">Selecione os filtros e clique em "Gerar Lista"</div></div>
+        </div>
+
+        <div class="page" id="page-alunos">
+          <div class="page-header">
+            <div><div class="page-title">🎒 Alunos</div><p class="page-sub">1º ao 9º Ano — Filtrar por escola, turma e série</p></div>
+            <div class="page-actions no-print">
+              <select class="form-control" id="filtro-escola-alunos" onchange="filtrarAlunosPorEscola(this.value)"><option value="">Todas as escolas</option></select>
+              <select class="form-control" id="filtro-turma-alunos" onchange="carregarAlunos(document.getElementById('filtro-escola-alunos').value)"><option value="">Todas as turmas</option></select>
+              <div class="search-wrap"><span class="search-ico">🔍</span><input oninput="filtrarTabela(this, 'tb-alunos')" placeholder="Buscar aluno..." type="text" /></div>
+              <select class="form-control" id="filtro-serie-alunos" onchange="filtrarAlunosPorSerie(this.value)"><option value="">Todas séries</option><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select>
+              <button type="button" class="btn btn-green" onclick="go('lista-turma')">📋 Lista</button>
+              <button type="button" class="btn btn-outline no-print" onclick="imprimirAlunos()">🖨 Imprimir</button>
+              <button type="button" class="btn btn-primary" onclick="openM('m-aluno')">+ Novo Aluno</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nº</th><th>Matrícula</th><th>Nome Completo</th><th>Série</th><th>Turma</th><th>Escola</th><th>Ações</th></tr></thead>
+                <tbody id="tb-alunos"><tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-prova-upload">
+          <div class="page-header">
+            <div><div class="page-title">📤 Cadastrar Prova</div><p class="page-sub">Configure os parâmetros da avaliação</p></div>
+          </div>
+          <div class="g2 no-print">
+            <div class="card">
+              <div class="card-header"><div class="card-title">📝 Informações</div></div>
+              <div class="form-row c1">
+                <div class="form-group"><label class="form-label">Título <span class="req">*</span></label><input class="form-control" id="prova-titulo" placeholder="Ex: 1º Semestre — Matemática" /></div>
+              </div>
+              <div class="form-row c1">
+                <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="prova-escola"><option value="">Selecione a escola...</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Disciplina <span class="req">*</span></label>
+                  <select class="form-control" id="prova-disciplina" onchange="atualizarInfoAlts()">
+                    <option value="Matemática">Matemática</option>
+                    <option value="Português">Português</option>
+                    <option value="Produção de Texto">Produção de Texto</option>
+                    <option value="Ciências Humanas">Ciências Humanas</option>
+                    <option value="Ciências Naturais">Ciências Naturais</option>
+                    <option value="História">História</option>
+                    <option value="Geografia">Geografia</option>
+                    <option value="Inglês">Inglês</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Semestre</label>
+                  <select class="form-control" id="prova-bimestre">
+                    <option selected value="1º SEMESTRE">1º SEMESTRE</option>
+                    <option value="2º SEMESTRE">2º SEMESTRE</option>
+                    <option value="3º SEMESTRE">3º SEMESTRE</option>
+                    <option value="4º SEMESTRE">4º SEMESTRE</option>
+                    <option value="RECUPERAÇÃO">RECUPERAÇÃO</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Série <span class="req">*</span></label><select class="form-control" id="prova-serie" onchange="atualizarInfoAlts()"><option value="1º Ano">1º Ano</option><option value="2º Ano">2º Ano</option><option value="3º Ano">3º Ano</option><option value="4º Ano">4º Ano</option><option value="5º Ano">5º Ano</option><option value="6º Ano">6º Ano</option><option value="7º Ano">7º Ano</option><option value="8º Ano">8º Ano</option><option value="9º Ano">9º Ano</option></select></div>
+                <div class="form-group"><label class="form-label">Data</label><input class="form-control" id="prova-data" type="date" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Nº de Questões</label><select class="form-control" id="prova-questoes"></select></div>
+                <div class="form-group"><label class="form-label">Nota Máxima</label><input class="form-control" id="prova-nota" type="number" value="10" /></div>
+              </div>
+              <div id="info-alts" style="padding: 10px 14px; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; font-size: 12px; color: #a78bfa; font-weight: 600; margin-bottom: 6px;">ℹ 1º Ano — Gabarito com 3 alternativas: A, B, C</div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">📁 Arquivo</div></div>
+              <div class="upload-zone" onclick="simUpload()" style="margin-bottom: 14px">
+                <div class="uz-ico">📤</div>
+                <p><strong>Clique para enviar</strong> ou arraste aqui</p>
+                <p class="uz-hint">PDF, DOCX, PNG — máx. 50MB</p>
+              </div>
+              <div id="up-ok" style="display: none; padding: 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: var(--green);">✅ <strong>arquivo_enviado.pdf</strong> — enviado!</div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-green btn-full" onclick="salvarProva()">💾 Salvar</button>
+                <button type="button" class="btn btn-primary btn-full" onclick="go('gabarito')">➡ Gabarito</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-gabarito">
+          <div class="page-header">
+            <div><div class="page-title">✅ Cadastrar / Editar Gabarito</div><p class="page-sub">Preencha as alternativas e os códigos Habilidade BNCC (opcional)</p></div>
+          </div>
+          <div class="card no-print">
+            <div class="form-row c3">
+              <div class="form-group"><label class="form-label">Prova <span class="req">*</span></label><select class="form-control" id="gab-prova" onchange="buildGabGrid()"><option value="">Selecione...</option></select></div>
+              <div class="form-group"><label class="form-label">Série <span class="req">*</span></label><select class="form-control" id="gab-serie" onchange="buildGabGrid()"><option value="1">1º Ano — A, B, C</option><option selected value="2">2º Ano — A, B, C, D</option><option value="3">3º Ano — A, B, C, D</option><option value="4">4º Ano — A, B, C, D</option><option value="5">5º Ano — A, B, C, D</option><option value="6">6º Ano — A, B, C, D</option><option value="7">7º Ano — A, B, C, D</option><option value="8">8º Ano — A, B, C, D</option><option value="9">9º Ano — A, B, C, D</option></select></div>
+              <div class="form-group"><label class="form-label">Nº de Questões</label><select class="form-control" id="gab-total" onchange="buildGabGrid()"></select></div>
+            </div>
+            <div id="gab-info-alts" style="display: flex; gap: 10px; flex-wrap: wrap">
+              <div style="padding: 8px 14px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; font-size: 12px; font-weight: 700; color: #a78bfa;">📝 Gabarito com 4 alternativas: A, B, C, D</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📝 Gabarito das Questões</div>
+              <div class="btn-group no-print">
+                <button type="button" class="btn btn-outline btn-sm" onclick="fillGabRand()">🎲 Teste</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="clearGab()">🗑 Limpar</button>
+              </div>
+            </div>
+            <div id="gab-header-container"></div>
+            <div class="gab-grid" id="gab-grid"></div>
+            <div class="form-row c3 no-print" id="gab-pts-row" style="margin-top: 18px">
+              <div class="form-group"><label class="form-label">Pts por Acerto</label><input class="form-control" step="0.1" type="number" value="0.5" /></div>
+              <div class="form-group"><label class="form-label">Penalidade</label><select class="form-control"><option>Sem penalidade</option><option>-0.25</option><option>-0.5</option></select></div>
+              <div class="form-group"><label class="form-label">Questões Anuladas</label><input class="form-control" placeholder="Ex: 5, 12" /></div>
+            </div>
+            <div class="btn-group no-print">
+              <button type="button" class="btn btn-green" onclick="saveGab()">💾 Salvar Gabarito</button>
+              <button type="button" class="btn btn-purple" onclick="go('corrigir-ia')">🤖 Corrigir com IA</button>
+              <button type="button" class="btn btn-orange" id="btn-correcao-manual-gab" onclick="abrirCorrecaoManualStandalone()" style="display: none">✏ Correção Manual</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-corrigir-ia">
+          <div class="page-header">
+            <div><div class="page-title">🤖 Corrigir com IA</div><p class="page-sub">Detecção e correção automática de cartões resposta</p></div>
+          </div>
+          <div class="card no-print" style="margin-bottom: 18px; border: 2px solid rgba(139, 92, 246, 0.4);">
+            <div class="card-header">
+              <div class="card-title" style="color: #a78bfa; font-size: 18px">⚡ Correção Automática por QR Code</div>
+              <span class="badge badge-purple" style="font-size: 11px">NOVO</span>
+            </div>
+            <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px; line-height: 1.6;"><strong style="color: #a78bfa">Escaneie o cartão e o sistema identifica o aluno, prova, escola e turma automaticamente.</strong> Não precisa selecionar nada — só tirar a foto.</p>
+            <div class="qr-actions" style="margin-bottom: 16px">
+              <button type="button" class="btn btn-lg btn-full" onclick="document.getElementById('inp-arq-auto').click()" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; padding: 16px; font-size: 15px; font-weight: 700; box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);">📂 ESCOLHER FOTO DO CARTÃO</button>
+              <button type="button" class="btn btn-lg btn-full" onclick="abrirCameraAutomatico()" style="background: linear-gradient(135deg, #06b6d4, #0e7490); color: #fff; padding: 16px; font-size: 15px; font-weight: 700; box-shadow: 0 6px 24px rgba(6, 182, 212, 0.4);">📷 TIRAR FOTO AGORA</button>
+            </div>
+            <div id="auto-preview" style="display: none; text-align: center; margin: 12px 0; padding: 12px; background: var(--bg2); border-radius: 10px; border: 1px dashed var(--border2);">
+              <div style="font-size: 11px; color: var(--text3); font-weight: 700; margin-bottom: 8px;">📷 IMAGEM CARREGADA — PRONTA PARA CORRIGIR</div>
+              <img alt="Preview do cartão" id="auto-img-prev" src="" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border2);" />
+              <div style="margin-top: 12px"><button type="button" class="btn btn-green btn-lg" onclick="corrigirAutomatico()" style="padding: 14px 32px; font-size: 15px; font-weight: 700">🚀 CORRIGIR AUTOMATICAMENTE</button></div>
+            </div>
+            <div id="auto-resultado" style="display: none; margin-top: 16px; padding: 16px; background: var(--bg2); border-radius: 10px; border: 1px solid var(--border2);"><div id="auto-resultado-conteudo"></div></div>
+            <input accept="image/*" id="inp-arq-auto" onchange="processarArqAutomatico(this)" style="display: none" type="file" />
+          </div>
+          <div class="g2 no-print" style="margin-bottom: 18px">
+            <div class="card card-glow-blue" style="border-color: rgba(6, 182, 212, 0.3)">
+              <div class="card-header"><div class="card-title" style="color: var(--cyan)">📱 Câmera do Celular</div><span class="badge badge-cyan">Real-time</span></div>
+              <p style="font-size: 13px; color: var(--text2); margin-bottom: 14px; line-height: 1.6;">Aponte a câmera para o cartão resposta. O sistema detecta as marcações com IA automaticamente.</p>
+              <div onclick="abrirCamera()" style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 26px; text-align: center; cursor: pointer; transition: all 0.25s;">
+                <div style="font-size: 50px; margin-bottom: 8px">📱</div>
+                <p style="color: var(--text2); font-size: 13px">Clique para abrir a câmera</p>
+              </div>
+              <button type="button" class="btn btn-lg btn-full" onclick="abrirCamera()" style="margin-top: 12px; background: linear-gradient(135deg, var(--cyan), #0e7490); color: #fff; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);">📱 Abrir Câmera do Celular</button>
+            </div>
+            <div class="card card-glow-green">
+              <div class="card-header"><div class="card-title" style="color: var(--green)">📂 Escolher Arquivo</div><span class="badge badge-green">JPG / PNG</span></div>
+              <p style="font-size: 13px; color: var(--text2); margin-bottom: 14px; line-height: 1.6;">Selecione uma foto do cartão resposta. A IA detecta e corrige as respostas automaticamente.</p>
+              <div class="upload-zone" onclick="abrirArquivo()" style="margin-bottom: 10px">
+                <div class="uz-ico">📂</div>
+                <p><strong>Clique para escolher a imagem</strong></p>
+                <p class="uz-hint">JPG, PNG — máx. 20MB</p>
+              </div>
+              <div id="arq-preview" style="display: none; text-align: center; margin: 8px 0"><img alt="Preview arquivo" id="img-prev" src="" style="max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid var(--border);" /></div>
+              <button type="button" class="btn btn-lg btn-full btn-green" onclick="abrirArquivo()">📂 Escolher Arquivo</button>
+              <input accept="image/*" id="inp-arq" onchange="processarArq(this)" style="display: none" type="file" />
+            </div>
+          </div>
+          <div class="card no-print">
+            <div class="card-header"><div class="card-title">⚙ Configurações da Correção</div></div>
+            <div class="form-row c4">
+              <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="corrigir-escola" onchange="carregarTurmasPorEscolaCorrigir(this.value)"><option value="">Selecione a escola...</option></select></div>
+              <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="corrigir-turma" onchange="carregarAlunosPorTurmaCorrigir(this.value); carregarProvasPorTurmaCorrigir(this.value);"><option value="">Selecione a turma...</option></select></div>
+              <div class="form-group"><label class="form-label">Prova <span class="req">*</span></label><select class="form-control" id="corrigir-prova" onchange="carregarAlunosPorProvaFiltrados(this.value)"><option value="">Selecione...</option></select></div>
+              <div class="form-group"><label class="form-label">Aluno <span class="req">*</span></label><select class="form-control" id="corrigir-aluno"><option value="">Selecione...</option></select></div>
+            </div>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px;">
+              <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Detecção automática</label>
+              <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> OCR para nome/matrícula</label>
+              <label style="display: flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Calcular nota automaticamente</label>
+            </div>
+          </div>
+          <div id="ia-result" style="display: none">
+            <div class="card card-glow-green">
+              <div class="card-header">
+                <div class="card-title" style="color: var(--green)">🤖 Resultado — Correção por IA</div>
+                <div class="btn-group"><span class="badge badge-gray" id="ia-metodo">📌 método</span><span class="badge badge-gray" id="confianca-badge">0% conf.</span></div>
+              </div>
+              <div id="ia-resumo-confianca" style="display: none; padding: 10px 14px; background: var(--bg2); border-radius: 8px; margin-bottom: 14px; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px;"></div>
+              <div class="g2" style="margin-bottom: 14px">
+                <div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 13px;">
+                    <div style="background: var(--surface2); border-radius: 8px; padding: 9px;"><div style="color: var(--text3); font-size: 9px; font-weight: 700; margin-bottom: 3px;">ALUNO</div><div id="ia-aluno" style="font-weight: 700">—</div></div>
+                    <div style="background: var(--surface2); border-radius: 8px; padding: 9px;"><div style="color: var(--text3); font-size: 9px; font-weight: 700; margin-bottom: 3px;">PROVA</div><div id="ia-turma" style="font-weight: 700">—</div></div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text3); font-weight: 700; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px;">Respostas detectadas:</div>
+                  <div id="ia-resp" style="display: flex; flex-wrap: wrap; gap: 4px"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg2); border-radius: 12px; padding: 22px; text-align: center;">
+                  <div id="ia-nota" style="font-size: 68px; font-weight: 900; color: var(--green); line-height: 1;">0</div>
+                  <div style="font-size: 13px; color: var(--text2); margin-top: 4px;">Nota Final</div>
+                  <span class="badge badge-green" id="ia-status" style="margin-top: 10px; font-size: 12px; padding: 5px 16px">AGUARDANDO</span>
+                  <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center;">
+                    <!-- ✨ NOVO: botão Ver cartão original -->
+                    <button type="button" class="btn btn-outline btn-sm no-print" onclick="verCartaoOriginal()">🖼️ Ver cartão</button>
+                    <button type="button" class="btn btn-orange btn-sm no-print" onclick="abrirCorrecaoManual()">✏ Correção Manual</button>
+                    <button type="button" class="btn btn-green btn-sm no-print" onclick="salvarCorrecao()">💾 Salvar</button>
+                    <button type="button" class="btn btn-primary btn-sm no-print" onclick="go('rel-turma')">📊 Resultados</button>
+                  </div>
+                </div>
+              </div>
+              <div id="ia-comp" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px; margin-bottom: 14px;"></div>
+              <div class="btn-group no-print"><button type="button" class="btn btn-purple btn-sm" onclick="processarComIA(document.getElementById('ia-ultima-imagem')?.value)">🔄 Próximo</button></div>
+              <input id="ia-ultima-imagem" type="hidden" />
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-correcao-texto">
+          <div class="page-header">
+            <div><div class="page-title">📝 Correção de Texto com IA</div><p class="page-sub">OpenAI avalia coerência, coesão, gramática e critérios textuais</p></div>
+          </div>
+          <div class="g2 no-print">
+            <div>
+              <div class="card">
+                <div class="card-header"><div class="card-title">📥 Enviar Texto</div></div>
+                <div class="tab-nav" style="display: flex; gap: 4px; background: var(--bg2); padding: 4px; border-radius: 10px; margin-bottom: 14px;">
+                  <button type="button" class="tab-btn active" onclick="switchTab(0, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">📱 Câmera</button>
+                  <button type="button" class="tab-btn" onclick="switchTab(1, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">📂 Arquivo</button>
+                  <button type="button" class="tab-btn" onclick="switchTab(2, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">⌨ Digitar</button>
+                </div>
+                <div class="tab-c" id="tabc-0">
+                  <div onclick="abrirCamera()" style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 12px;">
+                    <div style="font-size: 46px; margin-bottom: 8px">📱</div>
+                    <p style="color: var(--text2); font-size: 13px">Fotografe a redação do aluno</p>
+                  </div>
+                  <button type="button" class="btn btn-full btn-lg" onclick="abrirCamera()" style="background: linear-gradient(135deg, var(--cyan), #0e7490); color: #fff; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);">📱 Abrir Câmera</button>
+                </div>
+                <div class="tab-c" id="tabc-1" style="display: none">
+                  <div class="upload-zone" onclick="document.getElementById('inp-txt').click()" style="margin-bottom: 12px">
+                    <div class="uz-ico">📸</div>
+                    <p><strong>Escolher foto da redação</strong></p>
+                    <p class="uz-hint">JPG, PNG, PDF</p>
+                  </div>
+                  <input accept="image/*,application/pdf" id="inp-txt" onchange="prevTexto(this)" style="display: none" type="file" />
+                  <div id="txt-img-prev" style="display: none; text-align: center; margin-bottom: 12px;"><img alt="Preview redação" id="txt-img" src="" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border);" /></div>
+                  <button type="button" class="btn btn-full btn-green" onclick="document.getElementById('inp-txt').click()">📂 Escolher Arquivo</button>
+                </div>
+                <div class="tab-c" id="tabc-2" style="display: none">
+                  <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Texto do Aluno</label><textarea class="form-control" id="txt-aluno" placeholder="Cole ou digite o texto aqui..." rows="8"></textarea></div>
+                </div>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Prova</label><select class="form-control" id="txt-prova"><option value="">Selecione...</option></select></div>
+                    <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="txt-escola" onchange="carregarTurmasTexto(this.value)"><option value="">Selecione a escola...</option></select></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="txt-turma" onchange="carregarAlunosPorTurmaTexto(this.value)"><option value="">Selecione a turma...</option></select></div>
+                    <div class="form-group"><label class="form-label">Aluno</label><select class="form-control" id="txt-aluno-select"><option value="">Selecione...</option></select></div>
+                  </div>
+                  <div style="margin-bottom: 14px">
+                    <label class="form-label" style="margin-bottom: 8px">Critérios de Avaliação</label>
+                    <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 6px;">
+                      <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Coerência e Coesão</label>
+                      <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Adequação ao Tema</label>
+                      <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Ortografia e Gramática</label>
+                      <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Riqueza Vocabular</label>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-full btn-lg btn-purple" onclick="avaliarTexto()">🤖 Avaliar com OpenAI</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card" id="txt-waiting" style="min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="font-size: 60px; margin-bottom: 14px; opacity: 0.35">🤖</div>
+                <h3 style="font-size: 16px; margin-bottom: 8px">Aguardando texto</h3>
+                <p style="font-size: 13px; color: var(--text2)">Envie a foto ou cole o texto e clique em <strong>"Avaliar com OpenAI"</strong></p>
+              </div>
+              <div class="card" id="txt-loading" style="display: none">
+                <div style="text-align: center; padding: 32px">
+                  <div class="spinner" style="margin-bottom: 14px"></div>
+                  <p style="font-size: 14px; font-weight: 700">OpenAI processando...</p>
+                  <p style="font-size: 12px; color: var(--text2); margin-top: 5px;">Analisando critérios textuais</p>
+                  <div class="progress" style="margin-top: 14px; height: 4px"><div class="progress-fill pf-purple" id="txt-pb" style="width: 0%; transition: width 0.15s"></div></div>
+                </div>
+              </div>
+              <div class="card card-glow-purple" id="txt-res" style="display: none">
+                <div class="card-header"><div class="card-title" style="color: #a78bfa">🤖 Avaliação OpenAI</div><span class="badge badge-purple">IA</span></div>
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: var(--bg2); border-radius: 10px; flex-wrap: wrap;">
+                  <div>
+                    <div id="txt-nota" style="font-size: 60px; font-weight: 900; line-height: 1; color: #a78bfa;">0</div>
+                    <div style="font-size: 12px; color: var(--text2); margin-top: 3px;">Nota Final</div>
+                  </div>
+                  <div style="flex: 1">
+                    <div id="txt-aluno-nome" style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">—</div>
+                    <span class="badge badge-green" id="txt-status">AGUARDANDO</span>
+                  </div>
+                </div>
+                <div class="ai-criteria-grid">
+                  <div class="ai-crit"><div class="ai-crit-name">Coerência e Coesão</div><div class="ai-crit-val" id="c-coe">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-coe" style="width: 0%"></div></div></div>
+                  <div class="ai-crit"><div class="ai-crit-name">Adequação ao Tema</div><div class="ai-crit-val" id="c-tema">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-tema" style="width: 0%"></div></div></div>
+                  <div class="ai-crit"><div class="ai-crit-name">Ortografia e Gramática</div><div class="ai-crit-val" id="c-ort">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-ort" style="width: 0%"></div></div></div>
+                  <div class="ai-crit"><div class="ai-crit-name">Riqueza Vocabular</div><div class="ai-crit-val" id="c-voc">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-voc" style="width: 0%"></div></div></div>
+                </div>
+                <div class="ai-feedback-box"><strong style="color: #a78bfa">📝 Feedback:</strong><br /><br /><span id="txt-fb">Aguardando avaliação...</span></div>
+                <div class="btn-group no-print" style="margin-top: 14px">
+                  <button type="button" class="btn btn-green btn-sm" onclick="salvarAvaliacaoTexto()">💾 Salvar</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="window.print()">🖨</button>
+                  <button type="button" class="btn btn-purple btn-sm" onclick="avaliarTexto()">🔄 Reavaliar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-gabaritos">
+          <div class="page-header">
+            <div><div class="page-title">📋 Gabaritos</div></div>
+            <div class="page-actions no-print"><button type="button" class="btn btn-primary" onclick="go('gabarito')">+ Novo Gabarito</button></div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Prova</th><th>Série</th><th>Questões</th><th>Alternativas</th><th>Habilidade BNCC</th><th>Criado</th><th>Ações</th></tr></thead>
+                <tbody id="tb-gabaritos"><tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-provas">
+          <div class="page-header">
+            <div><div class="page-title">📑 Provas</div></div>
+            <div class="page-actions no-print"><button type="button" class="btn btn-primary" onclick="go('prova-upload')">+ Nova Prova</button></div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Título</th><th>Série</th><th>Disciplina</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="tb-provas"><tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-rel-turma">
+          <div class="page-header">
+            <div><div class="page-title">📊 Relatório por Turma</div><p class="page-sub">Filtros e distribuição de acertos por disciplina</p></div>
+            <div class="page-actions no-print"><button type="button" class="btn btn-outline" onclick="imprimirRelatorioTurma()">🖨 Imprimir</button></div>
+          </div>
+          <div class="print-header print-only">
+            <h2>📊 Relatório por Turma</h2>
+            <p style="font-size: 11px; color: #666">Data: <span id="print-data-rel-turma"></span></p>
+          </div>
+          <div class="card no-print" style="margin-bottom: 16px">
+            <div class="form-row c4">
+              <div class="form-group"><label class="form-label">Escola</label><select class="form-control" id="rel-turma-escola" onchange="onRelTurmaEscolaChange(this.value)"><option value="">Selecione a escola</option></select></div>
+              <div class="form-group"><label class="form-label">Série</label><select class="form-control" id="rel-turma-serie" onchange="onRelTurmaSerieChange(this.value)"><option value="">Selecione a série</option></select></div>
+              <div class="form-group"><label class="form-label">Turma</label><select class="form-control" id="rel-turma-turma" onchange="onRelTurmaTurmaChange(this.value)"><option value="">Selecione a turma</option></select></div>
+              <div class="form-group"><label class="form-label">Prova</label><select class="form-control" id="rel-turma-prova" onchange="carregarRelatorioTurmaFiltrado()"><option value="">Selecione a prova</option></select></div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px">
+              <button type="button" class="btn btn-primary btn-sm" onclick="carregarRelatorioTurmaFiltrado()">🔍 Filtrar</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="limparFiltrosRelTurma()">✕ Limpar Filtros</button>
+            </div>
+          </div>
+          <div class="card" id="rel-tabela-alunos">
+            <div class="card-header">
+              <div class="card-title">📋 Lista de Alunos</div>
+              <span class="badge badge-gray" id="rel-total-alunos-tabela">0 alunos</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th rowspan="2">Pos.</th>
+                    <th rowspan="2">Nº</th>
+                    <th rowspan="2">Nome</th>
+                    <th rowspan="2">Série</th>
+                    <th class="col-disciplina" colspan="3" style="background: rgba(59, 130, 246, 0.05); border-bottom: 2px solid #3b82f6;">Português</th>
+                    <th class="col-disciplina" colspan="3" style="background: rgba(16, 185, 129, 0.05); border-bottom: 2px solid #10b981;">Matemática</th>
+                    <th class="col-disciplina" colspan="1" style="background: rgba(139, 92, 246, 0.05); border-bottom: 2px solid #8b5cf6; text-align: center;">Produção</th>
+                    <th class="col-disciplina" colspan="3" style="background: rgba(245, 158, 11, 0.05); border-bottom: 2px solid #f59e0b;">CH</th>
+                    <th class="col-disciplina" colspan="3" style="background: rgba(20, 184, 166, 0.05); border-bottom: 2px solid #14b8a6;">CN</th>
+                  </tr>
+                  <tr>
+                    <th style="background: rgba(59, 130, 246, 0.03); font-size: 7px; padding: 2px 2px;">Acertos</th>
+                    <th style="background: rgba(59, 130, 246, 0.03); font-size: 7px; padding: 2px 2px;">Erros</th>
+                    <th style="background: rgba(59, 130, 246, 0.03); font-size: 7px; padding: 2px 2px;">Nota</th>
+                    <th style="background: rgba(16, 185, 129, 0.03); font-size: 7px; padding: 2px 2px;">Acertos</th>
+                    <th style="background: rgba(16, 185, 129, 0.03); font-size: 7px; padding: 2px 2px;">Erros</th>
+                    <th style="background: rgba(16, 185, 129, 0.03); font-size: 7px; padding: 2px 2px;">Nota</th>
+                    <th style="background: rgba(139, 92, 246, 0.03); font-size: 7px; padding: 2px 2px;">Nota</th>
+                    <th style="background: rgba(245, 158, 11, 0.03); font-size: 7px; padding: 2px 2px;">Acertos</th>
+                    <th style="background: rgba(245, 158, 11, 0.03); font-size: 7px; padding: 2px 2px;">Erros</th>
+                    <th style="background: rgba(245, 158, 11, 0.03); font-size: 7px; padding: 2px 2px;">Nota</th>
+                    <th style="background: rgba(20, 184, 166, 0.03); font-size: 7px; padding: 2px 2px;">Acertos</th>
+                    <th style="background: rgba(20, 184, 166, 0.03); font-size: 7px; padding: 2px 2px;">Erros</th>
+                    <th style="background: rgba(20, 184, 166, 0.03); font-size: 7px; padding: 2px 2px;">Nota</th>
+                  </tr>
+                </thead>
+                <tbody id="tb-rel-alunos"><tr><td colspan="17" style="text-align: center; padding: 30px; color: var(--text3);">Nenhum aluno encontrado com os filtros selecionados.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" id="rel-distribuicao-unica">
+            <div class="card-header">
+              <div class="card-title" id="rel-disciplina-titulo">📈 Distribuição de Notas — <span id="rel-disciplina-nome">Disciplina</span></div>
+              <span class="badge badge-blue" id="rel-total-correcoes">0 correções</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 12px">
+              <div style="background: var(--bg2); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: center; gap: 32px; font-size: 16px; font-weight: 600; flex-wrap: wrap;">
+                  <span style="color: var(--green)">✅ Acertos: <span id="rel-disc-acertos">0</span></span>
+                  <span style="color: var(--red)">❌ Erros: <span id="rel-disc-erros">0</span></span>
+                  <span style="color: var(--blue)">⭐ Média: <span id="rel-disc-media">0.0</span></span>
+                  <span style="color: var(--purple)">📊 Conceito: <span id="rel-disc-conceito">—</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-config">
+          <div class="page-header">
+            <div><div class="page-title">⚙ Configurações</div><p class="page-sub">Ajustes do sistema e gerenciamento de usuários</p></div>
+            <button type="button" class="btn btn-green no-print" onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+          </div>
+          <div class="no-print" style="width: 100%; max-width: 100%; margin: 0; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%;">
+              <div class="card">
+                <div class="card-header"><div class="card-title">🏫 Instituição</div></div>
+                <div class="form-row c1"><div class="form-group"><label class="form-label">Instituição</label><input class="form-control" id="config-secretaria" placeholder="Nome da instituição" /></div></div>
+                <div class="form-row c1"><div class="form-group"><label class="form-label">Localização</label><input class="form-control" id="config-municipio" placeholder="Cidade / Estado" /></div></div>
+              </div>
+              <div class="card">
+                <div class="card-header"><div class="card-title">🤖 IA & Scanner</div></div>
+                <div class="form-row c1"><div class="form-group"><label class="form-label">Modelo OpenAI</label><select class="form-control" id="config-modelo"><option>gpt-4o-mini</option><option>gpt-4o</option></select></div></div>
+                <div class="form-row c1"><div class="form-group"><label class="form-label">API Key OpenAI</label><input class="form-control" id="config-api-key" placeholder="Chave opcional" type="password" /></div></div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%;">
+              <div class="card">
+                <div class="card-header"><div class="card-title">📊 Escala de Notas</div></div>
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">Nota Máxima</label><input class="form-control" id="config-nota-max" type="number" value="10" /></div>
+                  <div class="form-group"><label class="form-label">Mínima (Aprovação)</label><input class="form-control" id="config-nota-min" type="number" value="5" /></div>
+                </div>
+              </div>
+              <div class="card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(6, 182, 212, 0.06)); border: 1px dashed rgba(139, 92, 246, 0.3);">
+                <div class="card-header"><div class="card-title">💡 Dica</div></div>
+                <p style="font-size: 13px; color: var(--text2); line-height: 1.6; margin: 0;">As configurações de <strong>Escola</strong> agora são obrigatórias ao criar <strong>Provas</strong> e <strong>Usuários</strong>. Usuários com perfil <strong>Administrador</strong> veem todas as escolas, usuários comuns veem apenas a sua.</p>
+              </div>
+            </div>
+            <div class="card" style="width: 100%">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="card-title">👥 Usuários do Sistema</div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalUsuario()">+ Novo Usuário</button>
+              </div>
+              <div class="table-wrap" style="width: 100%; overflow-x: auto">
+                <table style="width: 100%; min-width: 500px">
+                  <thead><tr><th style="width: 35%">Usuário</th><th style="width: 15%">Perfil</th><th style="width: 30%">Escola</th><th style="width: 10%">Status</th><th style="width: 10%">Ação</th></tr></thead>
+                  <tbody id="tb-usuarios"><tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text3);">Carregando usuários...</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-disciplinas">
+          <div class="page-header">
+            <div><div class="page-title">📚 Disciplinas</div><p class="page-sub">Gerencie as disciplinas da sua escola. As marcadas como <strong>Global</strong> valem para todas.</p></div>
+            <div class="page-actions no-print"><button type="button" class="btn btn-primary" onclick="abrirModalDisciplina()">+ Nova Disciplina</button></div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th style="width: 60px">Ícone</th><th>Nome</th><th style="width: 100px">Código</th><th style="width: 80px">Cor</th><th style="width: 130px">Escopo</th><th style="width: 80px">Ordem</th><th style="width: 130px">Ações</th></tr></thead>
+                <tbody id="tb-disciplinas"><tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text3);">Carregando disciplinas...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-u-dashboard"></div>
+        <div class="page" id="page-u-escola"></div>
+        <div class="page" id="page-u-turmas"></div>
+        <div class="page" id="page-u-alunos"></div>
+        <div class="page" id="page-u-resultados"></div>
+        <div class="page" id="page-u-relatorios"></div>
+      </div>
+    </div>
+
+    <!-- MODAIS -->
+    <div class="cam-modal no-print" id="cam-modal">
+      <div class="cam-container">
+        <div class="cam-header"><h3>📱 Scanner — Câmera do Celular</h3><button type="button" class="modal-close" onclick="fecharCamera()">×</button></div>
+        <div class="cam-video-wrap">
+          <video autoplay id="cam-video" playsinline></video>
+          <div class="cam-frame"><div class="cam-corner cc-tl"></div><div class="cam-corner cc-tr"></div><div class="cam-corner cc-bl"></div><div class="cam-corner cc-br"></div></div>
+          <div class="cam-scan-line"></div>
+        </div>
+        <div class="cam-controls">
+          <button type="button" class="btn btn-red" onclick="fecharCamera()">✕ Cancelar</button>
+          <button type="button" class="btn btn-outline" onclick="trocarCamera()" style="color: var(--cyan); border-color: var(--cyan)">🔄 Virar</button>
+          <button type="button" class="btn btn-green btn-lg" onclick="capturarFoto()">📸 Capturar</button>
+        </div>
+        <p class="cam-hint">Enquadre o cartão resposta na moldura verde</p>
+        <div style="text-align: center; font-size: 11px; color: var(--orange); margin-top: 8px; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 6px;">
+          ⚠ <strong>Dicas de iluminação:</strong><br />
+          • Coloque o cartão perto de uma janela (luz natural)<br />
+          • Evite sua sombra em cima do cartão<br />
+          • Não use flash direto (cria reflexo)<br />
+          • Segure o celular com as duas mãos para não tremer
+        </div>
+        <canvas id="cam-canvas" style="display: none"></canvas>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-correcao-manual">
+      <div class="modal" style="max-width: 800px; width: 95vw">
+        <div class="modal-header"><h3>✏ Correção Manual — <span id="cm-aluno-nome">Aluno</span></h3><button type="button" class="modal-close" onclick="closeM('m-correcao-manual')">×</button></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--text2)">📝 Respostas do Aluno</span>
+          <div class="btn-group no-print">
+            <button type="button" class="btn btn-orange btn-sm" onclick="revisarApenasDuvidosas()">🔍 Revisar Duvidosas</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="preencherGabaritoCM()">📋 Preencher com Gabarito</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="limparRespostasCM()">🗑 Limpar</button>
+          </div>
+        </div>
+        <div class="correcao-aluno-info">
+          <div class="info-item"><span class="label">Prova</span><strong id="cm-prova-titulo">—</strong></div>
+          <div class="info-item"><span class="label">Série / Turma</span><strong id="cm-turma-info">—</strong></div>
+          <div class="info-item"><span class="label">Data da Correção</span><strong id="cm-data-correcao">—</strong></div>
+          <div class="info-item"><span class="label">Status</span><strong id="cm-status-atual">—</strong></div>
+        </div>
+        <div class="correcao-manual-grid" id="cm-grid"></div>
+        <div class="resumo-correcao">
+          <div class="item"><div class="valor acertos" id="cm-acertos">0</div><div class="label">Acertos</div></div>
+          <div class="item"><div class="valor erros" id="cm-erros">0</div><div class="label">Erros</div></div>
+          <div class="item"><div class="valor nota" id="cm-nota">0,0</div><div class="label">Nota Final</div></div>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0">
+          <span class="badge badge-gray" id="cm-status-badge">AGUARDANDO</span>
+          <span id="cm-porcentagem" style="font-size: 12px; color: var(--text2)">0% de aproveitamento</span>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-correcao-manual')">✕ Fechar</button>
+          <button type="button" class="btn btn-green" onclick="salvarCorrecaoManual()">💾 Salvar Correção</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-correcao-manual-standalone">
+      <div class="modal" style="max-width: 800px; width: 95vw">
+        <div class="modal-header"><h3>✏ Correção Manual</h3><button type="button" class="modal-close" onclick="closeM('m-correcao-manual-standalone')">×</button></div>
+        <div id="cm-selects-container">
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="cm-escola-select" onchange="carregarTurmasParaCorrecaoManual(this.value)"><option value="">Selecione a escola...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="cm-turma-select" onchange="carregarAlunosParaCorrecaoManual(this.value); carregarProvasParaCorrecaoManualPorTurma(this.value);"><option value="">Selecione a turma...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Prova <span class="req">*</span></label><select class="form-control" id="cm-prova-select" onchange="carregarGabaritoParaCorrecaoManual()"><option value="">Selecione a prova...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Aluno <span class="req">*</span></label><select class="form-control" id="cm-aluno-select"><option value="">Selecione o aluno...</option></select></div>
+          <button type="button" class="btn btn-primary btn-full" onclick="iniciarCorrecaoManualStandalone()" style="margin-top: 8px">📝 Iniciar Correção</button>
+        </div>
+        <div class="correcao-aluno-info" id="cm-info-standalone" style="display: none">
+          <div class="info-item"><span class="label">Aluno</span><strong id="cm-sa-aluno">—</strong></div>
+          <div class="info-item"><span class="label">Turma / Série</span><strong id="cm-sa-turma">—</strong></div>
+          <div class="info-item"><span class="label">Prova</span><strong id="cm-sa-prova">—</strong></div>
+          <div class="info-item"><span class="label">Data</span><strong id="cm-sa-data">—</strong></div>
+        </div>
+        <div id="cm-grid-standalone-container" style="display: none">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; margin-top: 16px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--text2)">📝 Marque as respostas do aluno</span>
+            <div class="btn-group no-print">
+              <button type="button" class="btn btn-orange btn-sm" onclick="revisarApenasDuvidosasSA()">🔍 Revisar Duvidosas</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="preencherGabaritoManualSA()">📋 Preencher com Gabarito</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="limparRespostasManualSA()">🗑 Limpar</button>
+            </div>
+          </div>
+          <div class="cm-grid-standalone" id="cm-grid-standalone"></div>
+          <div class="resumo-correcao" id="cm-sa-resumo">
+            <div class="item"><div class="valor acertos" id="cm-sa-acertos">0</div><div class="label">Acertos</div></div>
+            <div class="item"><div class="valor erros" id="cm-sa-erros">0</div><div class="label">Erros</div></div>
+            <div class="item"><div class="valor nota" id="cm-sa-nota">0,0</div><div class="label">Nota Final</div></div>
+          </div>
+          <div id="cm-sa-badges" style="display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0">
+            <span class="badge badge-gray" id="cm-sa-status-badge">AGUARDANDO</span>
+            <span id="cm-sa-porcentagem" style="font-size: 12px; color: var(--text2)">0% de aproveitamento</span>
+          </div>
+        </div>
+        <div id="cm-nota-manual-container">
+          <div class="cm-nota-titulo">⭐ Nota Manual — Produção de Texto</div>
+          <div class="cm-nota-sub">Digite a nota (0 a 10) e clique em <strong>"Salvar Nota"</strong>.</div>
+          <div class="cm-nota-fields">
+            <div class="form-group"><label class="form-label">Nota (0 a 10) <span class="req">*</span></label><input class="form-control" id="cm-nota-valor" max="10" min="0" placeholder="8.5" step="0.1" type="number" /></div>
+          </div>
+          <div class="cm-nota-actions">
+            <button type="button" class="btn-salvar-nota-cm" id="btn-salvar-nota-cm" onclick="salvarNotaProducaoCM()">💾 SALVAR NOTA</button>
+            <span class="cm-nota-hint">→ A nota aparecerá imediatamente em Resultados</span>
+          </div>
+          <div id="cm-nota-status"></div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-correcao-manual-standalone')">✕ Fechar</button>
+          <button type="button" class="btn btn-green" id="btn-salvar-correcao-manual" onclick="salvarCorrecaoManualStandalone()" style="display: none">💾 Salvar Correção</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-editar-escola">
+      <div class="modal">
+        <div class="modal-header"><h3>✏ Editar Escola</h3><button type="button" class="modal-close" onclick="closeM('m-editar-escola')">×</button></div>
+        <input id="editar-escola-id" type="hidden" />
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="editar-escola-nome" /></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">INEP</label><input class="form-control" id="editar-escola-inep" /></div>
+          <div class="form-group"><label class="form-label">Município</label><input class="form-control" id="editar-escola-municipio" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">UF</label><input class="form-control" id="editar-escola-estado" maxlength="2" /></div>
+          <div class="form-group"><label class="form-label">Telefone</label><input class="form-control" id="editar-escola-telefone" /></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Diretor(a)</label><input class="form-control" id="editar-escola-diretor" /></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-editar-escola')">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarEdicaoEscola()">💾 Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-editar-turma">
+      <div class="modal">
+        <div class="modal-header"><h3>✏ Editar Turma</h3><button type="button" class="modal-close" onclick="closeM('m-editar-turma')">×</button></div>
+        <input id="editar-turma-id" type="hidden" />
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="editar-turma-escola"></select></div>
+          <div class="form-group"><label class="form-label">Ano Letivo</label><input class="form-control" id="editar-turma-ano" type="number" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="editar-turma-nome" /></div>
+          <div class="form-group"><label class="form-label">Série <span class="req">*</span></label><select class="form-control" id="editar-turma-serie"><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Turno</label><select class="form-control" id="editar-turma-turno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div>
+          <div class="form-group"><label class="form-label">Capacidade</label><input class="form-control" id="editar-turma-capacidade" type="number" /></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Professor(a)</label><input class="form-control" id="editar-turma-professor" /></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-editar-turma')">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarEdicaoTurma()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-editar-aluno">
+      <div class="modal">
+        <div class="modal-header"><h3>✏ Editar Aluno</h3><button type="button" class="modal-close" onclick="closeM('m-editar-aluno')">×</button></div>
+        <input id="editar-aluno-id" type="hidden" />
+        <div class="form-row" style="grid-template-columns: 130px 1fr">
+          <div class="form-group"><label class="form-label">Número</label><input class="form-control" id="editar-aluno-numero" type="number" /></div>
+          <div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="editar-aluno-nome" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="editar-aluno-escola" onchange="carregarTurmasPorEscolaParaAluno(this.value, 'editar-aluno-turma')"></select></div>
+          <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="editar-aluno-turma"></select></div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-editar-aluno')">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarEdicaoAluno()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="del-modal no-print" id="del-modal">
+      <div class="del-box">
+        <div class="del-icon">🗑</div>
+        <h3>Confirmar Exclusão</h3>
+        <p>Tem certeza que deseja excluir<br /><span class="del-nome-txt" id="del-nome-txt">este item</span>?<br /><br />Esta ação não pode ser desfeita.</p>
+        <div class="del-actions">
+          <button type="button" class="btn btn-outline" onclick="cancelarDel()">Cancelar</button>
+          <button type="button" class="btn btn-red" onclick="confirmarDel()">🗑 Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-escola">
+      <div class="modal">
+        <div class="modal-header"><h3>🏫 Cadastrar Escola</h3><button type="button" class="modal-close" onclick="closeM('m-escola')">×</button></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="escola-nome" /></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">INEP</label><input class="form-control" id="escola-inep" /></div>
+          <div class="form-group"><label class="form-label">Município</label><input class="form-control" id="escola-municipio" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">UF</label><input class="form-control" id="escola-estado" maxlength="2" /></div>
+          <div class="form-group"><label class="form-label">Telefone</label><input class="form-control" id="escola-telefone" /></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Diretor(a)</label><input class="form-control" id="escola-diretor" /></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-escola')">Cancelar</button>
+          <button type="button" class="btn btn-green" onclick="salvarEscola()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-turma">
+      <div class="modal">
+        <div class="modal-header"><h3>👥 Cadastrar Turma</h3><button type="button" class="modal-close" onclick="closeM('m-turma')">×</button></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="turma-escola"></select></div>
+          <div class="form-group"><label class="form-label">Ano Letivo</label><input class="form-control" id="turma-ano" type="number" value="2025" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="turma-nome" /></div>
+          <div class="form-group"><label class="form-label">Série <span class="req">*</span></label><select class="form-control" id="turma-serie"><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Turno</label><select class="form-control" id="turma-turno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div>
+          <div class="form-group"><label class="form-label">Capacidade</label><input class="form-control" id="turma-capacidade" type="number" /></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Professor(a)</label><input class="form-control" id="turma-professor" /></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-turma')">Cancelar</button>
+          <button type="button" class="btn btn-green" onclick="salvarTurma()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-aluno">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>🎒 Cadastrar Aluno</h3>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <button type="button" class="btn btn-green btn-sm" onclick="fecharAbaMulti()">📋 Lista</button>
+            <button type="button" class="modal-close" onclick="closeM('m-aluno')">×</button>
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns: 130px 1fr">
+          <div class="form-group"><label class="form-label">Número</label><input class="form-control" id="aluno-numero" type="number" /></div>
+          <div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="aluno-nome" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="aluno-escola" onchange="carregarTurmasPorEscolaParaAluno(this.value, 'aluno-turma')"></select></div>
+          <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="aluno-turma"></select></div>
+        </div>
+        <div class="multi-import-area no-print">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text2)">📋 Cadastro Múltiplo</span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="processarListaAlunos()">➕ Adicionar Múltiplos</button>
+          </div>
+          <textarea id="multi-alunos-input" placeholder="Cole a lista de alunos aqui." rows="3"></textarea>
+          <div class="multi-import-hint">💡 <strong>Formatos:</strong> <code>Nome, Matrícula, Número</code></div>
+          <div class="multi-status info" id="multi-status" style="display: none"><span id="multi-status-text">Pronto para importar</span></div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-green btn-sm" onclick="closeM('m-aluno'); go('lista-turma');" style="margin-right: auto">📋 Ver Lista</button>
+          <button type="button" class="btn btn-outline" onclick="closeM('m-aluno')">Cancelar</button>
+          <button type="button" class="btn btn-green" onclick="salvarAluno()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-prova">
+      <div class="modal">
+        <div class="modal-header"><h3>📝 Cadastrar Prova</h3><button type="button" class="modal-close" onclick="closeM('m-prova')">×</button></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Título <span class="req">*</span></label><input class="form-control" id="modal-prova-titulo" /></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Disciplina</label><select class="form-control" id="modal-prova-disciplina"><option>Matemática</option><option>Português</option><option>Ciências</option><option>História</option><option>Geografia</option><option>Inglês</option></select></div>
+          <div class="form-group">
+            <label class="form-label">Semestre</label>
+            <select class="form-control" id="modal-prova-bimestre">
+              <option>1º SEMESTRE</option>
+              <option>2º SEMESTRE</option>
+              <option>3º SEMESTRE</option>
+              <option>4º SEMESTRE</option>
+              <option>RECUPERAÇÃO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="modal-prova-turma"></select></div>
+          <div class="form-group"><label class="form-label">Data <span class="req">*</span></label><input class="form-control" id="modal-prova-data" type="date" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Valor Nota</label><input class="form-control" id="modal-prova-valor" type="number" value="10" /></div>
+          <div class="form-group"><label class="form-label">Tipo</label><select class="form-control" id="modal-prova-tipo"><option value="4">4 Opções (A,B,C,D)</option><option value="3">3 Opções (A,B,C)</option></select></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Gabarito</label><div id="modal-gabarito-grid" style="display: flex; flex-wrap: wrap; gap: 6px"></div></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-prova')">Cancelar</button>
+          <button type="button" class="btn btn-green" onclick="salvarProvaModal()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-usuario">
+      <div class="modal">
+        <div class="modal-header"><h3>👤 Cadastrar Usuário</h3><button type="button" class="modal-close" onclick="closeM('m-usuario')">×</button></div>
+        <input id="editar-usuario-id" type="hidden" value="" />
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="usuario-nome" /></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Login <span class="req">*</span></label><input class="form-control" id="usuario-username" /></div>
+          <div class="form-group"><label class="form-label">Senha <span class="req">*</span></label><input class="form-control" id="usuario-senha" type="password" /></div>
+        </div>
+        <div class="form-row c1">
+          <div class="form-group"><label class="form-label">Escola <span class="req" id="usuario-escola-req">*</span></label><select class="form-control" id="usuario-escola"></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">E-mail</label><input class="form-control" id="usuario-email" type="email" /></div>
+          <div class="form-group"><label class="form-label">Perfil <span class="req">*</span></label><select class="form-control" id="usuario-perfil" onchange="atualizarObrigatorioEscolaUsuario()"><option value="usuario">Usuário</option><option value="admin">Administrador</option></select></div>
+        </div>
+        <div class="form-row c1">
+          <div class="form-group"><label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;"><input checked id="usuario-ativo" style="width: 16px; height: 16px" type="checkbox" /> Usuário ativo</label></div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-usuario')">Cancelar</button>
+          <button type="button" class="btn btn-green" onclick="salvarUsuario()">💾 Salvar Usuário</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-disciplina">
+      <div class="modal">
+        <div class="modal-header"><h3 id="m-disciplina-titulo">📚 Nova Disciplina</h3><button type="button" class="modal-close" onclick="closeM('m-disciplina')">×</button></div>
+        <input id="disciplina-id" type="hidden" />
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="disciplina-nome" /></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Ícone</label><input class="form-control" id="disciplina-icone" maxlength="4" /></div>
+          <div class="form-group"><label class="form-label">Cor</label><input class="form-control" id="disciplina-cor" type="color" value="#3b82f6" style="height: 38px; padding: 4px" /></div>
+        </div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Ordem</label><input class="form-control" id="disciplina-ordem" type="number" value="99" /></div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-disciplina')">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarDisciplina()">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay no-print" id="m-visualizar-prova">
+      <div class="modal" style="max-width: 750px; width: 95vw">
+        <div class="modal-header"><h3>📋 Visualizar Prova</h3><button type="button" class="modal-close" onclick="closeM('m-visualizar-prova')">×</button></div>
+        <div id="visualizar-prova-conteudo"><div style="text-align: center; padding: 20px; color: var(--text3)">Carregando...</div></div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-visualizar-prova')">Fechar</button>
+          <button type="button" class="btn btn-primary" onclick="editarProvaDireto()">✏ Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✨ NOVO: Modal Ver Cartão Original (portado do adabee-sistema) -->
+    <div id="m-ver-cartao" class="modal-overlay no-print" style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); z-index:9999; padding:12px;">
+      <div style="position:relative; max-width:95vw; max-height:95vh; display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="abrirCartaoNovaAba()">🔗 Nova aba</button>
+          <button type="button" class="btn btn-green btn-sm" onclick="baixarCartaoOriginal()">⬇️ Baixar</button>
+          <button type="button" class="btn btn-red btn-sm" onclick="fecharCartaoOriginal()">✖️ Fechar</button>
+        </div>
+        <img id="ver-cartao-img" src="" alt="Cartão original" style="max-width:95vw; max-height:85vh; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.6);" />
+      </div>
+    </div>
+
+    <div class="toast-container no-print" id="toast-c"></div>
+
+    <div class="modal-overlay no-print" id="progress-modal" style="display: none; z-index: 10000">
+      <div class="modal" style="max-width: 500px; text-align: center">
+        <div class="modal-header"><h3 id="progress-titulo">⏳ Processando...</h3><button type="button" class="modal-close" id="progress-fechar" onclick="progressManager.fechar()" style="display: none">×</button></div>
+        <div style="padding: 10px 0">
+          <div id="progress-icone" style="font-size: 48px; margin-bottom: 10px">🤖</div>
+          <p id="progress-status" style="font-size: 14px; color: var(--text2); margin-bottom: 15px">Iniciando processamento...</p>
+          <div class="progress" style="height: 12px; background: var(--bg2); border-radius: 10px; overflow: hidden; margin: 10px 0;"><div class="progress-fill pf-purple" id="progress-barra" style="width: 0%; transition: width 0.3s ease"></div></div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text3); margin-top: 4px;"><span id="progress-porcentagem">0%</span><span id="progress-tempo">⏱ estimado: --</span></div>
+          <div style="margin-top: 15px; padding: 10px; background: var(--bg2); border-radius: 8px; text-align: left; font-size: 12px; color: var(--text2);"><div id="progress-etapas" style="display: flex; flex-direction: column; gap: 4px"></div></div>
+        </div>
+        <div class="modal-footer" style="justify-content: center; border-top: none; padding-top: 5px"><button type="button" class="btn btn-outline btn-sm" id="progress-cancelar" onclick="progressManager.fechar()" style="display: none">Cancelar</button></div>
+      </div>
+    </div>
+
+    <script src="js/core.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/escolas.js"></script>
+    <script src="js/turmas.js"></script>
+    <script src="js/alunos.js"></script>
+    <script src="js/provas.js?v=5002"></script>
+    <script src="js/gabaritos.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/disciplinas.js?v=5001"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/correcao-ia.js"></script>
+    <script src="js/correcao-manual.js"></script>
+    <script src="js/correcao-texto.js"></script>
+    <script src="js/relatorios.js?v=5001"></script>
+    <script src="js/cartoes.js"></script>
+    <script src="js/init.js?v=5001"></script>
+
+    <script>
+      function toggleMenu() {
+        const sb = document.getElementById("sidebar");
+        const ov = document.getElementById("menuOverlay");
+        sb.classList.toggle("open");
+        ov.classList.toggle("active");
+        document.body.style.overflow = sb.classList.contains("open") ? "hidden" : "";
+      }
+      document.addEventListener("DOMContentLoaded", function () {
+        const app = document.getElementById("app");
+        if (app) app.style.display = "flex";
+        if (typeof go === "function") go("dashboard");
+        window.addEventListener("resize", () => {
+          if (window.innerWidth > 768) {
+            document.getElementById("sidebar").classList.remove("open");
+            document.getElementById("menuOverlay").classList.remove("active");
+            document.body.style.overflow = "";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
