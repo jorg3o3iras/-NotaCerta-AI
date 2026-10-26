@@ -423,6 +423,8 @@
                   <div style="font-size: 13px; color: var(--text2); margin-top: 4px;">Nota Final</div>
                   <span class="badge badge-green" id="ia-status" style="margin-top: 10px; font-size: 12px; padding: 5px 16px">AGUARDANDO</span>
                   <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center;">
+                    <!-- ✨ NOVO: botão Ver cartão original -->
+                    <button type="button" class="btn btn-outline btn-sm no-print" onclick="verCartaoOriginal()">🖼️ Ver cartão</button>
                     <button type="button" class="btn btn-orange btn-sm no-print" onclick="abrirCorrecaoManual()">✏ Correção Manual</button>
                     <button type="button" class="btn btn-green btn-sm no-print" onclick="salvarCorrecao()">💾 Salvar</button>
                     <button type="button" class="btn btn-primary btn-sm no-print" onclick="go('rel-turma')">📊 Resultados</button>
@@ -1064,6 +1066,18 @@
           <button type="button" class="btn btn-outline" onclick="closeM('m-visualizar-prova')">Fechar</button>
           <button type="button" class="btn btn-primary" onclick="editarProvaDireto()">✏ Editar</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ✨ NOVO: Modal Ver Cartão Original (portado do adabee-sistema) -->
+    <div id="m-ver-cartao" class="modal-overlay no-print" style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); z-index:9999; padding:12px;">
+      <div style="position:relative; max-width:95vw; max-height:95vh; display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="abrirCartaoNovaAba()">🔗 Nova aba</button>
+          <button type="button" class="btn btn-green btn-sm" onclick="baixarCartaoOriginal()">⬇️ Baixar</button>
+          <button type="button" class="btn btn-red btn-sm" onclick="fecharCartaoOriginal()">✖️ Fechar</button>
+        </div>
+        <img id="ver-cartao-img" src="" alt="Cartão original" style="max-width:95vw; max-height:85vh; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.6);" />
       </div>
     </div>
 
