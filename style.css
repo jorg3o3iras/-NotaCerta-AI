@@ -102,7 +102,11 @@ body::before {
     z-index: 999;
     backdrop-filter: blur(12px);
 }
-.menu-overlay.show { display: block; }
+/* ✨ CORRIGIDO: o JS do index.html usa classList.toggle("active"),
+   mas o CSS original só ativava com ".show".
+   Agora aceita AMBOS para não quebrar nada. */
+.menu-overlay.show,
+.menu-overlay.active { display: block; }
 
 /* SIDEBAR */
 .sidebar {
@@ -1060,14 +1064,20 @@ tr:hover td { background: rgba(255,255,255,0.03); }
     max-height: 90vh !important;
     overflow-y: auto !important;
 }
+
 /* ═══════════════════════════════════════════════════════════
-   FIX DEFINITIVO: Forçar a página de disciplinas a ignorar 
-   o erro de HTML e se alinhar perfeitamente com o sistema.
+   ✨ CORRIGIDO: Página de disciplinas
+   O CSS original tinha `margin-left: 50px` + `width: calc(100% - 280px)`
+   aplicados no `#page-disciplinas`, mas essa página JÁ ESTÁ DENTRO do
+   `.content` (que tem `margin-left: 280px`). Aplicar de novo encolhia
+   a página pela metade e desalinhava o conteúdo.
+   Agora: a página respeita 100% da largura disponível do container,
+   sem margem extra e sem width recalibrado.
    ═══════════════════════════════════════════════════════════ */
 
 #page-disciplinas {
-    margin-left: 50px !important; /* Mesma margem do menu lateral */
-    width: calc(100% - 280px) !important;
+    margin-left: 0 !important;
+    width: 100% !important;
     padding: 28px 32px !important;
     height: 100vh !important;
     overflow-y: auto !important;
@@ -1088,4 +1098,3 @@ tr:hover td { background: rgba(255,255,255,0.03); }
         padding-top: 76px !important;
     }
 }
-
