@@ -1,3 +1,11 @@
+# ============================================================
+# CORREÇÃO MANUAL — rota /api/corrigir_manual
+# ✨ PORTADO do adabee-sistema:
+#    - Detecta 'MULTIPLA' vindo do front e trata como ERRO (não acerto)
+#    - status/status_texto explícitos para MULTIPLA
+#    - NÃO altera mais nada (mesma assinatura, mesmo JSON de retorno)
+# ============================================================
+
 import json
 import traceback
 
@@ -17,7 +25,7 @@ def corrigir_manual():
     try:
         data = request.json or {}
         prova_id = data.get('prova_id'); aluno_id = data.get('aluno_id')
-        respostas = data.get('respostas') or []           # ← FIX
+        respostas = data.get('respostas') or []
         acertos = data.get('acertos', 0) or 0
         nota = data.get('nota', 0) or 0
         total = data.get('total', 0) or 0
@@ -42,24 +50,48 @@ def corrigir_manual():
             return jsonify({'erro': 'Use SALVAR NOTA', 'tipo': 'producao'}), 400
         prova_titulo = prova['titulo'] if prova else ''
         serie_prova = prova['serie'] if prova else ''
-        gabarito = (prova['gabarito'] if prova else []) or []   # ← FIX None-safe
-        bncc_gab = (prova['bncc'] if prova else []) or []       # ← FIX None-safe
+        gabarito = (prova['gabarito'] if prova else []) or []
+        bncc_gab = (prova['bncc'] if prova else []) or []
         cur.execute("SELECT t.serie FROM alunos a LEFT JOIN turmas t ON a.turma_id=t.id WHERE a.id=%s", (aluno_id,))
         s = cur.fetchone()
         serie = s['serie'] if s else serie_prova or '1º Ano'
         tipo_av = identificar_disciplina(prova_titulo, disciplina, serie)
+
+        # ── Monta questoes_status (MULTIPLA = erro marcado) ────
         qs = []
         for i in range(total):
             r = str(respostas[i]) if i < len(respostas) and respostas[i] is not None else ''
             g = str(gabarito[i]) if i < len(gabarito) and gabarito[i] is not None else ''
-            c = bool(r and g and r.upper() == g.upper())
             cod = bncc_gab[i] if i < len(bncc_gab) and bncc_gab[i] else ''
-            if c: msg = 'ADQUIRIU HABILIDADE'
-            elif r: msg = 'RECOMPOSIÇÃO DE APRENDIZAGEM'
-            else: msg = 'NÃO RESPONDEU'
-            qs.append({'numero': i+1, 'resposta': r or '—', 'gabarito': g or '—',
-                       'acertou': c, 'status': msg,
-                       'status_texto': f"{'✅ ACERTOU' if c else '❌ ERROU'}: {msg}", 'bncc': cod})
+
+            is_multipla = (r.upper() == 'MULTIPLA')
+            c = bool(r and g and not is_multipla and r.upper() == g.upper())
+
+            if c:
+                msg = 'ADQUIRIU HABILIDADE'
+                st = f'✅ ACERTOU: {msg}'
+            elif is_multipla:
+                msg = 'MÚLTIPLA MARCAÇÃO'
+                st = '⚠️ MÚLTIPLA MARCAÇÃO: mais de uma bolha preenchida'
+            elif r:
+                msg = 'RECOMPOSIÇÃO DE APRENDIZAGEM'
+                st = f'❌ ERROU: {msg}'
+            else:
+                msg = 'NÃO RESPONDEU'
+                st = '— NÃO RESPONDEU'
+
+            qs.append({
+                'numero': i + 1,
+                'resposta': r or '—',
+                'gabarito': g or '—',
+                'acertou': c,
+                'respondida': bool(r),
+                'multipla': is_multipla,
+                'status': msg,
+                'status_texto': st,
+                'bncc': cod,
+            })
+
         qs_json = json.dumps(qs)
         cur.execute("SELECT id FROM historico WHERE prova_id=%s AND aluno_id=%s", (prova_id, aluno_id))
         existe = cur.fetchone()
