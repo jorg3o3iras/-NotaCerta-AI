@@ -1,0 +1,54 @@
+<div class="modal-overlay no-print" id="m-correcao-manual-standalone">
+      <div class="modal" style="max-width: 800px; width: 95vw">
+        <div class="modal-header"><h3>✏ Correção Manual</h3><button type="button" class="modal-close" onclick="closeM('m-correcao-manual-standalone')">×</button></div>
+        <div id="cm-selects-container">
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="cm-escola-select" onchange="carregarTurmasParaCorrecaoManual(this.value)"><option value="">Selecione a escola...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="cm-turma-select" onchange="carregarAlunosParaCorrecaoManual(this.value); carregarProvasParaCorrecaoManualPorTurma(this.value);"><option value="">Selecione a turma...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Prova <span class="req">*</span></label><select class="form-control" id="cm-prova-select" onchange="carregarGabaritoParaCorrecaoManual()"><option value="">Selecione a prova...</option></select></div>
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Aluno <span class="req">*</span></label><select class="form-control" id="cm-aluno-select"><option value="">Selecione o aluno...</option></select></div>
+          <button type="button" class="btn btn-primary btn-full" onclick="iniciarCorrecaoManualStandalone()" style="margin-top: 8px">📝 Iniciar Correção</button>
+        </div>
+        <div class="correcao-aluno-info" id="cm-info-standalone" style="display: none">
+          <div class="info-item"><span class="label">Aluno</span><strong id="cm-sa-aluno">—</strong></div>
+          <div class="info-item"><span class="label">Turma / Série</span><strong id="cm-sa-turma">—</strong></div>
+          <div class="info-item"><span class="label">Prova</span><strong id="cm-sa-prova">—</strong></div>
+          <div class="info-item"><span class="label">Data</span><strong id="cm-sa-data">—</strong></div>
+        </div>
+        <div id="cm-grid-standalone-container" style="display: none">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; margin-top: 16px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--text2)">📝 Marque as respostas do aluno</span>
+            <div class="btn-group no-print">
+              <button type="button" class="btn btn-orange btn-sm" onclick="revisarApenasDuvidosasSA()">🔍 Revisar Duvidosas</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="preencherGabaritoManualSA()">📋 Preencher com Gabarito</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="limparRespostasManualSA()">🗑 Limpar</button>
+            </div>
+          </div>
+          <div class="cm-grid-standalone" id="cm-grid-standalone"></div>
+          <div class="resumo-correcao" id="cm-sa-resumo">
+            <div class="item"><div class="valor acertos" id="cm-sa-acertos">0</div><div class="label">Acertos</div></div>
+            <div class="item"><div class="valor erros" id="cm-sa-erros">0</div><div class="label">Erros</div></div>
+            <div class="item"><div class="valor nota" id="cm-sa-nota">0,0</div><div class="label">Nota Final</div></div>
+          </div>
+          <div id="cm-sa-badges" style="display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0">
+            <span class="badge badge-gray" id="cm-sa-status-badge">AGUARDANDO</span>
+            <span id="cm-sa-porcentagem" style="font-size: 12px; color: var(--text2)">0% de aproveitamento</span>
+          </div>
+        </div>
+        <div id="cm-nota-manual-container">
+          <div class="cm-nota-titulo">⭐ Nota Manual — Produção de Texto</div>
+          <div class="cm-nota-sub">Digite a nota (0 a 10) e clique em <strong>"Salvar Nota"</strong>.</div>
+          <div class="cm-nota-fields">
+            <div class="form-group"><label class="form-label">Nota (0 a 10) <span class="req">*</span></label><input class="form-control" id="cm-nota-valor" max="10" min="0" placeholder="8.5" step="0.1" type="number"></div>
+          </div>
+          <div class="cm-nota-actions">
+            <button type="button" class="btn-salvar-nota-cm" id="btn-salvar-nota-cm" onclick="salvarNotaProducaoCM()">💾 SALVAR NOTA</button>
+            <span class="cm-nota-hint">→ A nota aparecerá imediatamente em Resultados</span>
+          </div>
+          <div id="cm-nota-status"></div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-correcao-manual-standalone')">✕ Fechar</button>
+          <button type="button" class="btn btn-green" id="btn-salvar-correcao-manual" onclick="salvarCorrecaoManualStandalone()" style="display: none">💾 Salvar Correção</button>
+        </div>
+      </div>
+    </div>
