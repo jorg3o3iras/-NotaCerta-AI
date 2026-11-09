@@ -1,11 +1,11 @@
 # ============================================================
-# STATIC — serve index.html/css/js da raiz do projeto
+# STATIC — serve index.html/css/js/partials da raiz do projeto
 # Caminho ABSOLUTO (funciona em qualquer working directory)
 # ============================================================
 
 import os
 
-from flask import Blueprint, jsonify, send_file
+from flask import Blueprint, jsonify, send_file, request
 
 static_bp = Blueprint('static_served', __name__)
 
@@ -22,11 +22,27 @@ MIME_TYPES = {
     '.txt': 'text/plain', '.xml': 'application/xml',
 }
 
+# Diretórios que podem ser servidos via catch-all.
+# 'js' já funcionava antes — mantido. 'css' e 'partials' são os novos.
+ALLOWED_DIRS = ('js', 'css', 'partials')
+
 
 def _mimetype(filename):
     _, ext = os.path.splitext(filename.lower())
     return MIME_TYPES.get(ext)
 
+
+def _safe_join(root, *parts):
+    """Resolve um caminho e garante que ele fica dentro de `root`."""
+    full = os.path.abspath(os.path.join(root, *parts))
+    if not full.startswith(os.path.abspath(root) + os.sep) and full != os.path.abspath(root):
+        return None
+    return full
+
+
+# ============================================================
+# Rotas principais
+# ============================================================
 
 @static_bp.route('/')
 def index():
@@ -66,15 +82,100 @@ def serve_js():
     return "// não encontrado", 404, {'Content-Type': 'application/javascript'}
 
 
+# ============================================================
+# Rotas explícitas — NÃO dependem do catch-all
+# ============================================================
+
+@static_bp.route('/css/<path:filename>')
+def serve_css_dir(filename):
+    return _serve_from_dir('css', filename, 'text/css', "/* não encontrado */")
+
+
+@static_bp.route('/partials/<path:filename>')
+def serve_partials_dir(filename):
+    return _serve_from_dir('partials', filename, 'text/html', "<!-- não encontrado -->")
+
+
+@static_bp.route('/js/<path:filename>')
+def serve_js_dir(filename):
+    return _serve_from_dir('js', filename, 'application/javascript', "// não encontrado")
+
+
+def _serve_from_dir(dirname, filename, default_mime, fallback_body):
+    if '..' in filename or filename.startswith('/'):
+        return jsonify({'erro': 'Caminho inválido'}), 400
+    full = _safe_join(PROJECT_ROOT, dirname, filename)
+    if full and os.path.isfile(full):
+        return send_file(full, mimetype=_mimetype(filename) or default_mime)
+    return fallback_body, 404, {'Content-Type': default_mime}
+
+
+# ============================================================
+# Catch-all — mantido para o que já funcionava (imagens, fontes,
+# favicon, index.html via rota específica, etc.) mas RESTRITO
+# a diretórios permitidos por segurança.
+# ============================================================
+
 @static_bp.route('/<path:filename>')
 def serve_static_file(filename):
     if '..' in filename or filename.startswith('/'):
         return jsonify({'erro': 'Caminho inválido'}), 400
-    path = os.path.join(PROJECT_ROOT, filename)
-    if os.path.isfile(path):
-        return send_file(path, mimetype=_mimetype(filename))
+
+    # Arquivo solto na raiz (ex.: favicon.ico, manifest.json, robots.txt)
+    # Serve somente se for extensão conhecida e NÃO for código-fonte.
+    if os.sep not in filename and '/' not in filename:
+        if filename.endswith(('.env', '.py', '.pyc', '.db', '.sqlite', '.sqlite3')):
+            return jsonify({'erro': 'Arquivo não encontrado', 'path': filename}), 404
+        full = _safe_join(PROJECT_ROOT, filename)
+        if full and os.path.isfile(full):
+            return send_file(full, mimetype=_mimetype(filename))
+
+    # Subdiretório — só serve se o PRIMEIRO segmento for permitido
+    top_dir = filename.split('/', 1)[0]
+    if top_dir in ALLOWED_DIRS:
+        full = _safe_join(PROJECT_ROOT, filename)
+        if full and os.path.isfile(full):
+            return send_file(full, mimetype=_mimetype(filename))
+
+    # Fallback de erro por extensão
     if filename.endswith('.css'):
         return "/* não encontrado */", 404, {'Content-Type': 'text/css'}
     if filename.endswith('.js'):
         return "// não encontrado", 404, {'Content-Type': 'application/javascript'}
     return jsonify({'erro': 'Arquivo não encontrado', 'path': filename}), 404
+
+
+# ============================================================
+# Diagnóstico — abra no navegador se algo der 404
+# ============================================================
+
+@static_bp.route('/__debug/arquivos')
+def debug_arquivos():
+    """Lista o que existe em css/, partials/ e js/ para diagnóstico."""
+    resultado = {'project_root': PROJECT_ROOT, 'cwd': os.getcwd()}
+
+    for d in ('css', 'js', 'partials'):
+        base = os.path.join(PROJECT_ROOT, d)
+        if not os.path.isdir(base):
+            resultado[d] = '(diretório não existe)'
+            continue
+        encontrados = []
+        for root, _dirs, files in os.walk(base):
+            for f in sorted(files):
+                rel = os.path.relpath(os.path.join(root, f), PROJECT_ROOT)
+                encontrados.append(rel.replace(os.sep, '/'))
+        resultado[d] = encontrados
+
+    # Checa especificamente os arquivos novos
+    resultado['checagens'] = {
+        'css/layout.css': os.path.isfile(os.path.join(PROJECT_ROOT, 'css', 'layout.css')),
+        'partials/layout/sidebar.html': os.path.isfile(
+            os.path.join(PROJECT_ROOT, 'partials', 'layout', 'sidebar.html')),
+        'partials/pages/dashboard.html': os.path.isfile(
+            os.path.join(PROJECT_ROOT, 'partials', 'pages', 'dashboard.html')),
+        'partials/modals/cam-modal.html': os.path.isfile(
+            os.path.join(PROJECT_ROOT, 'partials', 'modals', 'cam-modal.html')),
+        'js/boot.js': os.path.isfile(os.path.join(PROJECT_ROOT, 'js', 'boot.js')),
+    }
+
+    return jsonify(resultado), 200
