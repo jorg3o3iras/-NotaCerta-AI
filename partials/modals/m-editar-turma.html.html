@@ -1,0 +1,23 @@
+<div class="modal-overlay no-print" id="m-editar-turma">
+  <div class="modal">
+    <div class="modal-header"><h3>✏ Editar Turma</h3><button type="button" class="modal-close" onclick="closeM('m-editar-turma')">×</button></div>
+    <input id="editar-turma-id" type="hidden" />
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="editar-turma-escola"></select></div>
+      <div class="form-group"><label class="form-label">Ano Letivo</label><input class="form-control" id="editar-turma-ano" type="number" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="editar-turma-nome" /></div>
+      <div class="form-group"><label class="form-label">Série <span class="req">*</span></label><select class="form-control" id="editar-turma-serie"><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Turno</label><select class="form-control" id="editar-turma-turno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div>
+      <div class="form-group"><label class="form-label">Capacidade</label><input class="form-control" id="editar-turma-capacidade" type="number" /></div>
+    </div>
+    <div class="form-row c1"><div class="form-group"><label class="form-label">Professor(a)</label><input class="form-control" id="editar-turma-professor" /></div></div>
+    <div class="modal-footer no-print">
+      <button type="button" class="btn btn-outline" onclick="closeM('m-editar-turma')">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="salvarEdicaoTurma()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
