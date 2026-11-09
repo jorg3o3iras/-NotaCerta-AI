@@ -1,0 +1,45 @@
+<div class="page" id="page-config">
+  <div class="page-header">
+    <div><div class="page-title">⚙ Configurações</div><p class="page-sub">Ajustes do sistema e gerenciamento de usuários</p></div>
+    <button type="button" class="btn btn-green no-print" onclick="salvarConfiguracoes()">💾 Salvar Configurações</button>
+  </div>
+  <div class="no-print" style="width:100%;max-width:100%;margin:0;display:flex;flex-direction:column;gap:20px;box-sizing:border-box;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏫 Instituição</div></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Instituição</label><input class="form-control" id="config-secretaria" placeholder="Nome da instituição" /></div></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Localização</label><input class="form-control" id="config-municipio" placeholder="Cidade / Estado" /></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🤖 IA & Scanner</div></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">Modelo OpenAI</label><select class="form-control" id="config-modelo"><option>gpt-4o-mini</option><option>gpt-4o</option></select></div></div>
+        <div class="form-row c1"><div class="form-group"><label class="form-label">API Key OpenAI</label><input class="form-control" id="config-api-key" placeholder="Chave opcional" type="password" /></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Escala de Notas</div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nota Máxima</label><input class="form-control" id="config-nota-max" type="number" value="10" /></div>
+          <div class="form-group"><label class="form-label">Mínima (Aprovação)</label><input class="form-control" id="config-nota-min" type="number" value="5" /></div>
+        </div>
+      </div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(6,182,212,0.06));border:1px dashed rgba(139,92,246,0.3);">
+        <div class="card-header"><div class="card-title">💡 Dica</div></div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6;margin:0;">As configurações de <strong>Escola</strong> agora são obrigatórias ao criar <strong>Provas</strong> e <strong>Usuários</strong>. Usuários com perfil <strong>Administrador</strong> veem todas as escolas, usuários comuns veem apenas a sua.</p>
+      </div>
+    </div>
+    <div class="card" style="width:100%">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div class="card-title">👥 Usuários do Sistema</div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalUsuario()">+ Novo Usuário</button>
+      </div>
+      <div class="table-wrap" style="width:100%;overflow-x:auto">
+        <table style="width:100%;min-width:500px">
+          <thead><tr><th style="width:35%">Usuário</th><th style="width:15%">Perfil</th><th style="width:30%">Escola</th><th style="width:10%">Status</th><th style="width:10%">Ação</th></tr></thead>
+          <tbody id="tb-usuarios"><tr><td colspan="5" class="table-empty">Carregando usuários...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
