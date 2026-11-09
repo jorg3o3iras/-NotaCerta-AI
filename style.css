@@ -1098,3 +1098,178 @@ tr:hover td { background: rgba(255,255,255,0.03); }
         padding-top: 76px !important;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FIX — ORGANIZAÇÃO DAS ABAS ALUNOS E TURMAS
+   Corrige alinhamento, espaçamento e responsividade dos campos
+   ═══════════════════════════════════════════════════════════ */
+
+/* --- 1. Grid responsivo real para form-rows (substitui o fixo 1fr 1fr) --- */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: start;
+}
+
+/* Linhas de 1 coluna continuam 1 coluna */
+.form-row.c1 { grid-template-columns: 1fr; }
+
+/* c3 e c4 agora se adaptam: 3 ou 4 colunas quando houver espaço, senão empilham */
+.form-row.c3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.form-row.c4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+/* --- 2. Grupos de formulário com altura e alinhamento consistentes --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0; /* evita overflow em grids */
+}
+
+/* Inputs e selects com altura uniforme (inclui textarea controlado) */
+.form-control,
+select.form-control,
+input.form-control {
+    height: 44px;
+    padding: 10px 14px;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+textarea.form-control {
+    height: auto;
+    min-height: 90px;
+    resize: vertical;
+}
+
+/* --- 3. Páginas Alunos e Turmas: cards mais organizados --- */
+#page-alunos .card,
+#page-turmas .card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Cabeçalho do card com alinhamento vertical consistente */
+#page-alunos .card-header,
+#page-turmas .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* --- 4. G2 mais inteligente para essas páginas (evita espremer) --- */
+#page-alunos .g2,
+#page-turmas .g2 {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    align-items: start;
+}
+
+/* --- 5. Tabelas de alunos/turmas mais legíveis --- */
+#page-alunos table th,
+#page-alunos table td,
+#page-turmas table th,
+#page-turmas table td {
+    text-align: left;
+    padding: 12px 14px;
+}
+
+/* Alinha a última coluna (geralmente ações) à direita */
+#page-alunos table th:last-child,
+#page-alunos table td:last-child,
+#page-turmas table th:last-child,
+#page-turmas table td:last-child {
+    text-align: right;
+}
+
+/* Grupo de botões dentro de células não quebra linha feio */
+#page-alunos table td .btn-group,
+#page-turmas table td .btn-group {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+/* --- 6. Ações da página (topo) alinhadas com o título --- */
+#page-alunos .page-header,
+#page-turmas .page-header {
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+#page-alunos .page-actions,
+#page-turmas .page-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* --- 7. Botões de formulário alinhados à direita quando sozinhos --- */
+#page-alunos .form-row:last-child,
+#page-turmas .form-row:last-child {
+    margin-bottom: 0;
+}
+
+/* --- 8. Responsivo: empilha tudo em telas pequenas --- */
+@media (max-width: 900px) {
+    .form-row,
+    .form-row.c3,
+    .form-row.c4 {
+        grid-template-columns: 1fr;
+    }
+    #page-alunos .g2,
+    #page-turmas .g2 {
+        grid-template-columns: 1fr;
+    }
+    #page-alunos table th,
+    #page-alunos table td,
+    #page-turmas table th,
+    #page-turmas table td {
+        padding: 10px 8px;
+        font-size: 12.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-control,
+    select.form-control,
+    input.form-control {
+        height: 42px;
+        font-size: 16px; /* evita zoom automático do iOS */
+    }
+    #page-alunos .page-actions,
+    #page-turmas .page-actions {
+        width: 100%;
+    }
+    #page-alunos .page-actions .btn,
+    #page-turmas .page-actions .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+/* --- 9. Garante que a página ocupe 100% sem margem extra --- */
+#page-alunos,
+#page-turmas {
+    margin-left: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* --- 10. Corrige selects de filtro (turma, turno, etc.) que ficam mais baixos --- */
+#page-alunos .search-wrap input,
+#page-turmas .search-wrap input {
+    height: 38px;
+}
+
+/* --- 11. Espaçamento interno consistente nos cards com formulário --- */
+#page-alunos .card .form-row,
+#page-turmas .card .form-row {
+    margin-bottom: 16px;
+}
