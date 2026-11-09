@@ -227,7 +227,7 @@
               <select class="form-control" id="filtro-turma-alunos" onchange="carregarAlunos(document.getElementById('filtro-escola-alunos').value)"><option value="">Todas as turmas</option></select>
               <div class="search-wrap"><span class="search-ico">🔍</span><input oninput="filtrarTabela(this, 'tb-alunos')" placeholder="Buscar aluno..." type="text" /></div>
               <select class="form-control" id="filtro-serie-alunos" onchange="filtrarAlunosPorSerie(this.value)"><option value="">Todas séries</option><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option></select>
-              <button type="button" class="btn btn-green" onclick="go('lista-turma')">📋 Lista</button>
+              <button type="button" class="btn btn-green" onclick="gerarListaAlunos()">📋 Listar</button>
               <button type="button" class="btn btn-outline no-print" onclick="imprimirAlunos()">🖨 Imprimir</button>
               <button type="button" class="btn btn-primary" onclick="openM('m-aluno')">+ Novo Aluno</button>
             </div>
@@ -423,7 +423,6 @@
                   <div style="font-size: 13px; color: var(--text2); margin-top: 4px;">Nota Final</div>
                   <span class="badge badge-green" id="ia-status" style="margin-top: 10px; font-size: 12px; padding: 5px 16px">AGUARDANDO</span>
                   <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center;">
-                    <!-- ✨ NOVO: botão Ver cartão original -->
                     <button type="button" class="btn btn-outline btn-sm no-print" onclick="verCartaoOriginal()">🖼️ Ver cartão</button>
                     <button type="button" class="btn btn-orange btn-sm no-print" onclick="abrirCorrecaoManual()">✏ Correção Manual</button>
                     <button type="button" class="btn btn-green btn-sm no-print" onclick="salvarCorrecao()">💾 Salvar</button>
@@ -1069,7 +1068,36 @@
       </div>
     </div>
 
-    <!-- ✨ NOVO: Modal Ver Cartão Original (portado do adabee-sistema) -->
+    <!-- ✨ MODAL: LISTA DE ALUNOS (gerada a partir da aba Alunos) -->
+    <div class="modal-overlay no-print" id="m-lista-alunos">
+      <div class="modal" style="max-width: 950px; width: 95vw">
+        <div class="modal-header">
+          <h3>📋 Lista de Alunos</h3>
+          <button type="button" class="modal-close" onclick="closeM('m-lista-alunos')">×</button>
+        </div>
+        <div id="lista-alunos-info" style="margin-bottom: 12px; padding: 10px 14px; background: var(--bg2); border-radius: 8px; font-size: 13px; line-height: 1.6;"></div>
+        <div class="table-wrap" id="lista-alunos-scroll" style="max-height: 60vh; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 60px">Nº</th>
+                <th style="width: 120px">Matrícula</th>
+                <th>Nome Completo</th>
+                <th style="width: 100px">Série</th>
+                <th style="width: 140px">Turma</th>
+                <th style="width: 180px">Escola</th>
+              </tr>
+            </thead>
+            <tbody id="tb-lista-alunos"></tbody>
+          </table>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-outline" onclick="closeM('m-lista-alunos')">Fechar</button>
+          <button type="button" class="btn btn-primary" onclick="imprimirListaAlunos()">🖨 Imprimir</button>
+        </div>
+      </div>
+    </div>
+
     <div id="m-ver-cartao" class="modal-overlay no-print" style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); z-index:9999; padding:12px;">
       <div style="position:relative; max-width:95vw; max-height:95vh; display:flex; flex-direction:column; align-items:center; gap:12px;">
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
@@ -1117,6 +1145,7 @@
     <script src="js/init.js?v=5001"></script>
 
     <script>
+      // ===== Menu mobile =====
       function toggleMenu() {
         const sb = document.getElementById("sidebar");
         const ov = document.getElementById("menuOverlay");
@@ -1124,6 +1153,101 @@
         ov.classList.toggle("active");
         document.body.style.overflow = sb.classList.contains("open") ? "hidden" : "";
       }
+
+      // ===== LISTA DE ALUNOS (aba Alunos — botão "Listar") =====
+      // Corrige o bug: antes o botão chamava go('lista-turma') e
+      // fazia o sistema "pular" para a aba Cartão Resposta.
+      // Agora gera a lista da turma filtrada em um modal e permite imprimir.
+      function gerarListaAlunos() {
+        const escolaSel = document.getElementById("filtro-escola-alunos");
+        const turmaSel  = document.getElementById("filtro-turma-alunos");
+        const serieSel  = document.getElementById("filtro-serie-alunos");
+
+        const escolaTexto = escolaSel && escolaSel.selectedIndex >= 0
+          ? escolaSel.options[escolaSel.selectedIndex].text : "Todas as escolas";
+        const turmaTexto = turmaSel && turmaSel.selectedIndex >= 0
+          ? turmaSel.options[turmaSel.selectedIndex].text : "Todas as turmas";
+        const serieTexto = serieSel && serieSel.selectedIndex >= 0
+          ? serieSel.options[serieSel.selectedIndex].text : "Todas as séries";
+
+        const origem = document.querySelectorAll("#tb-alunos tr");
+        const destino = document.getElementById("tb-lista-alunos");
+        destino.innerHTML = "";
+
+        let count = 0;
+        origem.forEach((row) => {
+          // Ignora linhas de "Carregando..." / vazio
+          const primeiraTd = row.querySelector("td");
+          if (primeiraTd && primeiraTd.hasAttribute("colspan")) return;
+
+          const cells = row.querySelectorAll("td");
+          if (cells.length < 6) return;
+
+          // Monta a nova linha sem a coluna "Ações"
+          const tr = document.createElement("tr");
+          for (let i = 0; i < 6; i++) {
+            const td = document.createElement("td");
+            td.innerHTML = cells[i].innerHTML;
+            tr.appendChild(td);
+          }
+          destino.appendChild(tr);
+          count++;
+        });
+
+        if (count === 0) {
+          destino.innerHTML =
+            '<tr><td colspan="6" style="text-align:center; padding:24px; color: var(--text3);">Nenhum aluno encontrado com os filtros selecionados.</td></tr>';
+        }
+
+        document.getElementById("lista-alunos-info").innerHTML =
+          `<strong>Filtros:</strong> ${escolaTexto} &nbsp;|&nbsp; ${turmaTexto} &nbsp;|&nbsp; ${serieTexto}`
+          + `<br><strong>Total:</strong> ${count} aluno(s)`;
+
+        // Abre o modal
+        const modal = document.getElementById("m-lista-alunos");
+        modal.classList.add("active");
+        modal.style.display = "flex";
+      }
+
+      function imprimirListaAlunos() {
+        const info = document.getElementById("lista-alunos-info").innerHTML;
+        const conteudo = document.getElementById("tb-lista-alunos").innerHTML;
+
+        const win = window.open("", "_blank");
+        win.document.write(`
+          <html><head><title>Lista de Alunos</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+            h2 { margin: 0 0 8px; font-size: 20px; }
+            .info { font-size: 13px; margin-bottom: 16px; padding: 10px 14px; background: #f3f4f6; border-radius: 6px; line-height: 1.5; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: left; font-size: 13px; }
+            th { background: #e5e7eb; font-weight: 700; }
+            @media print { body { padding: 0; } }
+          </style></head>
+          <body>
+            <h2>📋 Lista de Alunos</h2>
+            <div class="info">${info}</div>
+            <table>
+              <thead><tr>
+                <th style="width:60px">Nº</th>
+                <th style="width:120px">Matrícula</th>
+                <th>Nome Completo</th>
+                <th style="width:100px">Série</th>
+                <th style="width:140px">Turma</th>
+                <th style="width:180px">Escola</th>
+              </tr></thead>
+              <tbody>${conteudo}</tbody>
+            </table>
+          </body></html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 350);
+      }
+
+      // ===== Boot =====
       document.addEventListener("DOMContentLoaded", function () {
         const app = document.getElementById("app");
         if (app) app.style.display = "flex";
