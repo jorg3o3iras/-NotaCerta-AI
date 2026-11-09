@@ -1,0 +1,16 @@
+<div class="modal-overlay no-print" id="m-disciplina">
+  <div class="modal">
+    <div class="modal-header"><h3 id="m-disciplina-titulo">📚 Nova Disciplina</h3><button type="button" class="modal-close" onclick="closeM('m-disciplina')">×</button></div>
+    <input id="disciplina-id" type="hidden" />
+    <div class="form-row c1"><div class="form-group"><label class="form-label">Nome <span class="req">*</span></label><input class="form-control" id="disciplina-nome" /></div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Ícone</label><input class="form-control" id="disciplina-icone" maxlength="4" /></div>
+      <div class="form-group"><label class="form-label">Cor</label><input class="form-control" id="disciplina-cor" type="color" value="#3b82f6" style="height: 38px; padding: 4px" /></div>
+    </div>
+    <div class="form-row c1"><div class="form-group"><label class="form-label">Ordem</label><input class="form-control" id="disciplina-ordem" type="number" value="99" /></div></div>
+    <div class="modal-footer no-print">
+      <button type="button" class="btn btn-outline" onclick="closeM('m-disciplina')">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="salvarDisciplina()">💾 Salvar</button>
+    </div>
+  </div>
+</div>

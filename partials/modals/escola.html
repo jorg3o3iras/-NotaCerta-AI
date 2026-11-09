@@ -1,0 +1,17 @@
+<div class="page" id="page-escola">
+  <div class="page-header">
+    <div><div class="page-title">🏫 Escolas</div><p class="page-sub">Gerencie as unidades de ensino cadastradas</p></div>
+    <div class="page-actions no-print">
+      <div class="search-wrap"><span class="search-ico">🔍</span><input oninput="filtrarTabela(this, 'tb-escola')" placeholder="Buscar escola..." type="text" /></div>
+      <button type="button" class="btn btn-primary" onclick="openM('m-escola')">+ Nova Escola</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nome da Escola</th><th>Município</th><th>INEP</th><th>Diretor(a)</th><th>Turmas</th><th>Alunos</th><th>Ações</th></tr></thead>
+        <tbody id="tb-escola"><tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text3);">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>

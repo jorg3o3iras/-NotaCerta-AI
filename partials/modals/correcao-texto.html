@@ -1,0 +1,97 @@
+<div class="page" id="page-correcao-texto">
+  <div class="page-header">
+    <div><div class="page-title">📝 Correção de Texto com IA</div><p class="page-sub">OpenAI avalia coerência, coesão, gramática e critérios textuais</p></div>
+  </div>
+  <div class="g2 no-print">
+    <div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📥 Enviar Texto</div></div>
+        <div class="tab-nav" style="display: flex; gap: 4px; background: var(--bg2); padding: 4px; border-radius: 10px; margin-bottom: 14px;">
+          <button type="button" class="tab-btn active" onclick="switchTab(0, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">📱 Câmera</button>
+          <button type="button" class="tab-btn" onclick="switchTab(1, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">📂 Arquivo</button>
+          <button type="button" class="tab-btn" onclick="switchTab(2, this)" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">⌨ Digitar</button>
+        </div>
+        <div class="tab-c" id="tabc-0">
+          <div onclick="abrirCamera()" style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 12px;">
+            <div style="font-size: 46px; margin-bottom: 8px">📱</div>
+            <p style="color: var(--text2); font-size: 13px">Fotografe a redação do aluno</p>
+          </div>
+          <button type="button" class="btn btn-full btn-lg" onclick="abrirCamera()" style="background: linear-gradient(135deg, var(--cyan), #0e7490); color: #fff; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);">📱 Abrir Câmera</button>
+        </div>
+        <div class="tab-c" id="tabc-1" style="display: none">
+          <div class="upload-zone" onclick="document.getElementById('inp-txt').click()" style="margin-bottom: 12px">
+            <div class="uz-ico">📸</div>
+            <p><strong>Escolher foto da redação</strong></p>
+            <p class="uz-hint">JPG, PNG, PDF</p>
+          </div>
+          <input accept="image/*,application/pdf" id="inp-txt" onchange="prevTexto(this)" style="display: none" type="file" />
+          <div id="txt-img-prev" style="display: none; text-align: center; margin-bottom: 12px;"><img alt="Preview redação" id="txt-img" src="" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border);" /></div>
+          <button type="button" class="btn btn-full btn-green" onclick="document.getElementById('inp-txt').click()">📂 Escolher Arquivo</button>
+        </div>
+        <div class="tab-c" id="tabc-2" style="display: none">
+          <div class="form-group" style="margin-bottom: 12px"><label class="form-label">Texto do Aluno</label><textarea class="form-control" id="txt-aluno" placeholder="Cole ou digite o texto aqui..." rows="8"></textarea></div>
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Prova</label><select class="form-control" id="txt-prova"><option value="">Selecione...</option></select></div>
+            <div class="form-group"><label class="form-label">Escola <span class="req">*</span></label><select class="form-control" id="txt-escola" onchange="carregarTurmasTexto(this.value)"><option value="">Selecione a escola...</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Turma <span class="req">*</span></label><select class="form-control" id="txt-turma" onchange="carregarAlunosPorTurmaTexto(this.value)"><option value="">Selecione a turma...</option></select></div>
+            <div class="form-group"><label class="form-label">Aluno</label><select class="form-control" id="txt-aluno-select"><option value="">Selecione...</option></select></div>
+          </div>
+          <div style="margin-bottom: 14px">
+            <label class="form-label" style="margin-bottom: 8px">Critérios de Avaliação</label>
+            <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Coerência e Coesão</label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Adequação ao Tema</label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Ortografia e Gramática</label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: var(--text2);"><input checked type="checkbox" /> Riqueza Vocabular</label>
+            </div>
+          </div>
+          <button type="button" class="btn btn-full btn-lg btn-purple" onclick="avaliarTexto()">🤖 Avaliar com OpenAI</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="txt-waiting" style="min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <div style="font-size: 60px; margin-bottom: 14px; opacity: 0.35">🤖</div>
+        <h3 style="font-size: 16px; margin-bottom: 8px">Aguardando texto</h3>
+        <p style="font-size: 13px; color: var(--text2)">Envie a foto ou cole o texto e clique em <strong>"Avaliar com OpenAI"</strong></p>
+      </div>
+      <div class="card" id="txt-loading" style="display: none">
+        <div style="text-align: center; padding: 32px">
+          <div class="spinner" style="margin-bottom: 14px"></div>
+          <p style="font-size: 14px; font-weight: 700">OpenAI processando...</p>
+          <p style="font-size: 12px; color: var(--text2); margin-top: 5px;">Analisando critérios textuais</p>
+          <div class="progress" style="margin-top: 14px; height: 4px"><div class="progress-fill pf-purple" id="txt-pb" style="width: 0%; transition: width 0.15s"></div></div>
+        </div>
+      </div>
+      <div class="card card-glow-purple" id="txt-res" style="display: none">
+        <div class="card-header"><div class="card-title" style="color: #a78bfa">🤖 Avaliação OpenAI</div><span class="badge badge-purple">IA</span></div>
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: var(--bg2); border-radius: 10px; flex-wrap: wrap;">
+          <div>
+            <div id="txt-nota" style="font-size: 60px; font-weight: 900; line-height: 1; color: #a78bfa;">0</div>
+            <div style="font-size: 12px; color: var(--text2); margin-top: 3px;">Nota Final</div>
+          </div>
+          <div style="flex: 1">
+            <div id="txt-aluno-nome" style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">—</div>
+            <span class="badge badge-green" id="txt-status">AGUARDANDO</span>
+          </div>
+        </div>
+        <div class="ai-criteria-grid">
+          <div class="ai-crit"><div class="ai-crit-name">Coerência e Coesão</div><div class="ai-crit-val" id="c-coe">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-coe" style="width: 0%"></div></div></div>
+          <div class="ai-crit"><div class="ai-crit-name">Adequação ao Tema</div><div class="ai-crit-val" id="c-tema">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-tema" style="width: 0%"></div></div></div>
+          <div class="ai-crit"><div class="ai-crit-name">Ortografia e Gramática</div><div class="ai-crit-val" id="c-ort">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-ort" style="width: 0%"></div></div></div>
+          <div class="ai-crit"><div class="ai-crit-name">Riqueza Vocabular</div><div class="ai-crit-val" id="c-voc">0</div><div class="progress"><div class="progress-fill pf-purple" id="b-voc" style="width: 0%"></div></div></div>
+        </div>
+        <div class="ai-feedback-box"><strong style="color: #a78bfa">📝 Feedback:</strong><br /><br /><span id="txt-fb">Aguardando avaliação...</span></div>
+        <div class="btn-group no-print" style="margin-top: 14px">
+          <button type="button" class="btn btn-green btn-sm" onclick="salvarAvaliacaoTexto()">💾 Salvar</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="window.print()">🖨</button>
+          <button type="button" class="btn btn-purple btn-sm" onclick="avaliarTexto()">🔄 Reavaliar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
